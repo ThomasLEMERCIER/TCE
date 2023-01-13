@@ -1,7 +1,15 @@
+### Source and object files
+SRCS = bitboard.cpp definition.cpp evaluate.cpp move.cpp movegen.cpp perft.cpp position.cpp rng.cpp search.cpp tce.cpp uci.cpp utils.cpp
+# OBJS = $(notdir $(SRCS:.cpp=.o))
+
+$(info Source file: $(SRCS))
+$(info Object file: $(OBJS))
+
+MANDATORY_FLAG = -Wall -Wcast-qual -fno-exceptions -std=c++17 -pedantic -Wextra -Wshadow -Wmissing-declarations
+OPTI_FLAG = -O3
+DEBUG_FLAG = -DDEBUG
+
 release:
-	gcc -O3 tce.c -o tce.exe
+	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o tce_cpp.exe
 debug:
-	gcc -O3 -DDEBUG tce.c -o tce_d.exe; ./tce_d.exe
-all:
-	gcc -O3 tce.c -o tce.exe
-	gcc -O3 -DDEBUG tce.c -o tce_d.exe
+	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(DEBUG_FLAG) $(SRCS) -o tce_d.exe
