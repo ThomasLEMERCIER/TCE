@@ -95,7 +95,7 @@ void read_input() {
 }
 
 // a bridge function to interact between search and GUI input
-static void communicate() {
+void communicate() {
 	// if time is up break here
     if(timeset == 1 && get_time_ms() > stoptime) {
 
@@ -286,6 +286,14 @@ void parse_go(Position* pos, char *command)
 
   // search position
   search_position(pos, depth);
+}
+
+int get_stop_flag() {
+  return stopped;
+}
+
+void reset_stop_flag() {
+  stopped = 0;
 }
 
 void uci_loop() {

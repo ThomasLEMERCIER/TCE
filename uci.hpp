@@ -34,10 +34,12 @@ extern int stopped;
 
 int input_waiting();
 void read_input();
-static void communicate();
+void communicate();
 int parse_move(Position* pos, char *move_string);
 void parse_position(Position* pos, char *command);
 void parse_go(Position* pos, char *command);
 void uci_loop();
+int get_stop_flag();
+void reset_stop_flag();
 
 #endif

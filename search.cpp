@@ -144,9 +144,9 @@ int repetition_detection(Position* pos) {
 
 int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   // every 2047 nodes
-  // if((nodes & 2047 ) == 0)
-  //   // "listen" to the GUI/user input
-  //   communicate();
+  if((nodes & 2047 ) == 0)
+    // "listen" to the GUI/user input
+    communicate();
 
   // increment nodes count
   nodes++;
@@ -179,8 +179,7 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   
     int score = -quiescence(next_pos, -beta, -alpha, nodes);
 
-    // // return 0 if time is up
-    // if(stopped == 1) return 0;
+    if(get_stop_flag()) return 0;
     
     if (score > alpha) {
       alpha = score;
@@ -195,9 +194,9 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
 
 int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, long& nodes) {
   // every 2047 nodes
-  // if((nodes & 2047 ) == 0)
-  //   // "listen" to the GUI/user input
-  //   communicate();
+  if((nodes & 2047 ) == 0)
+    // "listen" to the GUI/user input
+    communicate();
 
   if (repetition_detection(pos))
     return draw_value;
@@ -298,9 +297,9 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
       }
     }
 
-    // // return 0 if time is up
-    // if(stopped == 1) return 0;
     moves_searched++;
+
+    if (get_stop_flag()) return 0;
 
     // found a better move
     if (score > alpha) {
@@ -373,13 +372,14 @@ void search_position(Position* pos, int depth) {
   int alpha = -infinity, beta = infinity;
 
   int starttime = get_time_ms();
+  reset_stop_flag();
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= depth; current_depth++) {
     // if time is up
-    // if(stopped == 1)
-		// 	// stop calculating and return best move so far 
-		// 	break;
+    if(get_stop_flag())
+			// stop calculating and return best move so far 
+			break;
 
     printf("Current depth: %d\n", current_depth);
 

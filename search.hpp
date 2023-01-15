@@ -9,6 +9,7 @@
 #include "move.hpp"
 #include "evaluate.hpp"
 #include "utils.hpp"
+#include "uci.hpp"
 
 #define infinity 50000
 #define mate_value 49000
