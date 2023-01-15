@@ -88,7 +88,7 @@ extern Bitboard black_passed_masks[SQUARE_NB];
 
 constexpr int double_pawn_penalty = -10;
 constexpr int isolated_pawn_penalty = -10;
-constexpr int passed_pawn_bonus[8] = { 200, 150, 100, 75, 50, 30, 10, 0 }; 
+constexpr int passed_pawn_bonus[8] = { 200, 150, 100, 0, 0, 0, 0, 0 }; 
 
 constexpr int semi_open_file_score = 10;
 constexpr int open_file_score = 15;

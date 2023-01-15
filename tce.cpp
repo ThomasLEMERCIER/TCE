@@ -32,10 +32,13 @@ int main() {
 
   if (debug) {
     printf("debug mode\n");
-    Position pos[1];
+    // uci_loop();
 
-    pos->set("4r1k1/ppp3pp/n4p2/3Ppq2/4R2P/5N2/PPP2RP1/6K1 w - - 0 26");
-    printf("Evaluation: %d\n", evaluate(pos));
+    Position pos[1];
+    pos->set("4R3/1p3rk1/p4p1p/8/8/5P2/1PP3pB/2K5 b - - 1 36");
+    long n=0;
+
+    printf("Evaluation: %d\n", quiescence(pos, -50000, 5000, n));
   }
   else
     uci_loop();

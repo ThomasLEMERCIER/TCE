@@ -18,11 +18,6 @@
 
 constexpr int MAX_PLY = 64;
 
-extern int killer_moves [2][MAX_PLY];
-extern int history_moves[12][64];
-extern int pv_length[MAX_PLY];
-extern int pv_table[MAX_PLY][MAX_PLY];
-extern int follow_pv, score_pv;
 
 /*    ================================
             Triangular PV table
@@ -44,6 +39,12 @@ extern int follow_pv, score_pv;
       5    0    0    0    0    0    m6
 */
 
+struct SearchData {
+  int killer_moves[2][MAX_PLY];
+  int history_moves[12][64];
+  int pv_length[MAX_PLY];
+  Move pv_table[MAX_PLY][MAX_PLY];
+};
 
 #define hash_size 800000
 #define no_hash_entry 100000
@@ -68,7 +69,10 @@ public:
   void write_entry(Position* pos, int flag, int score, int depth);
   void clear();
 };
+
 extern TranspositionTable TT;
+extern SearchData sd;
+extern int follow_pv, score_pv;
 
 
 int score_move(Position* pos, Move move);

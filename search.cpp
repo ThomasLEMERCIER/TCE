@@ -2,16 +2,17 @@
 
 #include <stdio.h>
 
-int killer_moves [2][MAX_PLY];
-int history_moves[12][64];
-int pv_length[MAX_PLY];
-int pv_table[MAX_PLY][MAX_PLY];
+SearchData sd;
 TranspositionTable TT;
 int follow_pv, score_pv;
 
 
 void TranspositionTable::clear() {
   memset(this, 0, sizeof(TranspositionTable));
+}
+
+void clear_search_data() {
+  memset(&sd, 0, sizeof(SearchData));
 }
 
 int TranspositionTable::probe(Position* pos, int alpha, int beta, int depth) {
@@ -55,7 +56,7 @@ int score_move(Position* pos, Move move) {
   // PV move scoring is allowed
   if (score_pv) {
     // dealing with the PV move
-    if (pv_table[0][pos->ply] == move) {
+    if (sd.pv_table[0][pos->ply] == move) {
       // disable score pv flag
       score_pv = 0;
 
@@ -84,16 +85,16 @@ int score_move(Position* pos, Move move) {
   // score quiet move
   else {
     // score 1st killer move
-    if (killer_moves[0][pos->ply] == move)
+    if (sd.killer_moves[0][pos->ply] == move)
       return 9000;
 
     // score 2nd killer move
-    else if (killer_moves[1][pos->ply] == move)
+    else if (sd.killer_moves[1][pos->ply] == move)
       return 8000;
 
     // score history move
     else
-      return history_moves[get_move_piece(move)][get_move_target(move)];
+      return sd.history_moves[get_move_piece(move)][get_move_target(move)];
   }
 
   return 0;
@@ -104,7 +105,7 @@ void enable_pv_scoring(Position* pos, MoveList *move_list) {
   follow_pv = 0;
 
   for (int count = 0; count < move_list->move_count; count++) {
-    if (pv_table[0][pos->ply] == move_list->moves[count]) {
+    if (sd.pv_table[0][pos->ply] == move_list->moves[count]) {
       score_pv = 1;
       follow_pv = 1;
     }
@@ -208,7 +209,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
     return score;
   }
 
-  pv_length[pos->ply] = pos->ply;
+  sd.pv_length[pos->ply] = pos->ply;
 
   int in_check = is_square_attacked(pos, (pos->side == white) ? get_lsb_index(pos->bitboards[K]) :
                                                                 get_lsb_index(pos->bitboards[k]),
@@ -307,21 +308,21 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
 
       // store history moves
       if (!get_move_capture_f(move_list->moves[count]))
-        history_moves[get_move_piece(move_list->moves[count])][get_move_target(move_list->moves[count])] += depth;
+        sd.history_moves[get_move_piece(move_list->moves[count])][get_move_target(move_list->moves[count])] += depth;
 
       // PV node
       alpha = score;
 
       // write PV move
-      pv_table[pos->ply][pos->ply] = move_list->moves[count];
+      sd.pv_table[pos->ply][pos->ply] = move_list->moves[count];
             
       // loop over the next ply
-      for (int next_ply = pos->ply + 1; next_ply < pv_length[pos->ply + 1]; next_ply++)
+      for (int next_ply = pos->ply + 1; next_ply < sd.pv_length[pos->ply + 1]; next_ply++)
         // copy move from deeper ply into a current ply's line
-        pv_table[pos->ply][next_ply] = pv_table[pos->ply + 1][next_ply];
+        sd.pv_table[pos->ply][next_ply] = sd.pv_table[pos->ply + 1][next_ply];
       
       // adjust PV length
-      pv_length[pos->ply] = pv_length[pos->ply + 1];
+      sd.pv_length[pos->ply] = sd.pv_length[pos->ply + 1];
 
       // fail-hard beta cutoff
       if (score >= beta) {
@@ -329,8 +330,8 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
 
         // store killer moves
         if (!get_move_capture_f(move_list->moves[count])) {
-          killer_moves[1][pos->ply] = killer_moves[0][pos->ply];
-          killer_moves[0][pos->ply] = move_list->moves[count];
+          sd.killer_moves[1][pos->ply] = sd.killer_moves[0][pos->ply];
+          sd.killer_moves[0][pos->ply] = move_list->moves[count];
         }
         return beta;
       }
@@ -355,24 +356,18 @@ void search_position(Position* pos, int depth) {
   int score = 0;
   long nodes = 0;
 
-  // // reset "time is up" flag
-  // stopped = 0;
-
   // reset follow pv flags
   follow_pv = 0;
   score_pv = 0;
 
-  // clear helper data structures for search
-  memset(killer_moves, 0, sizeof(killer_moves));
-  memset(history_moves, 0, sizeof(history_moves));
-  memset(pv_length, 0, sizeof(pv_length));
-  memset(pv_table, 0, sizeof(pv_table));
+  clear_search_data();
 
   // init alpha beta
   int alpha = -infinity, beta = infinity;
 
   int starttime = get_time_ms();
   reset_stop_flag();
+  Move bestmove;
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= depth; current_depth++) {
@@ -398,13 +393,15 @@ void search_position(Position* pos, int depth) {
       score = negamax(pos, alpha, beta, current_depth, 0, nodes);
     }
 
-    // if(stopped == 1)
-		// 	// stop calculating and return best move so far 
-		// 	break;
+    bestmove = sd.pv_table[0][0];
+
+    if(get_stop_flag())
+			// stop calculating and return best move so far 
+			break;
 
     // aspiration window
-    alpha = score - 50;
-    beta = score + 50;
+    // alpha = score - 50;
+    // beta = score + 50;
     
     if (score > -mate_value && score < -mate_score) {
       printf("info score mate %d depth %d nodes %ld time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - starttime);
@@ -416,8 +413,8 @@ void search_position(Position* pos, int depth) {
       printf("info score cp %d depth %d nodes %ld time %d pv ", score, current_depth, nodes, get_time_ms() - starttime);
     
 
-    for (int count = 0; count < pv_length[0]; count++) {
-      print_move(pv_table[0][count]);
+    for (int count = 0; count < sd.pv_length[0]; count++) {
+      print_move(sd.pv_table[0][count]);
       printf(" ");
     }
     printf("\n");
@@ -427,7 +424,7 @@ void search_position(Position* pos, int depth) {
   }
 
   printf("bestmove ");
-  print_move(pv_table[0][0]);
+  print_move(bestmove);
   printf("\n");
 
 }

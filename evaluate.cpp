@@ -70,13 +70,13 @@ int evaluate(Position* pos) {
         case P:
           score += pawn_score[square];
 
-          double_pawns = count_bits(pos->bitboards[Piece::P] & get_file_bb(get_file(square)));
+          double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));
           
+          if (double_pawns > 1)
+            score += double_pawn_penalty;
+
           if ((pos->bitboards[Piece::P] & isolated_masks[square]) == 0)
             score += isolated_pawn_penalty;
-
-          if (double_pawns > 1)
-            score += double_pawn_penalty * double_pawns;
 
           if ((white_passed_masks[square] & pos->bitboards[Piece::p]) == 0)
             score += passed_pawn_bonus[get_rank(square)];
@@ -119,10 +119,10 @@ int evaluate(Position* pos) {
         case p:
           score -= pawn_score[mirror_score[square]];
 
-          double_pawns = count_bits(pos->bitboards[Piece::p] & get_file_bb(get_file(square)));       
+          double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));       
 
           if (double_pawns > 1)
-            score -= double_pawn_penalty * double_pawns;
+            score -= double_pawn_penalty;
 
           if ((pos->bitboards[Piece::p] & isolated_masks[square]) == 0)
             score -= isolated_pawn_penalty;
