@@ -24,9 +24,9 @@ constexpr int pawn_score[64] = {
   30,  30,  30,  40,  40,  30,  30,  30,
   20,  20,  20,  30,  30,  30,  20,  20,
   10,  10,  10,  20,  20,  10,  10,  10,
-    0,   0,   0,  20,  20,   0,   0,   0,
+    5,  5,  10,  20,  20,   5,   5,   5,
     0,   0,   0,   5,   5,   0,   0,   0,
-    5,   5,   5, -10, -10,   5,   5,   5,
+    0,   0,   0, -10, -10,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0
 };
 constexpr int knight_score[64] = {
@@ -46,7 +46,7 @@ constexpr int bishop_score[64] = {
   0,   0,  10,  20,  20,  10,   0,   0,
   0,   0,  10,  20,  20,  10,   0,   0,
   0,  10,   0,   0,   0,   0,  10,   0,
-  0,  10,   0,   0,   0,   0,  10,   0,
+  0,  30,   0,   0,   0,   0,  30,   0,
   0,   0, -10,   0,   0, -10,   0,   0
 };
 constexpr int rook_score[64] = {
@@ -68,7 +68,7 @@ constexpr int king_score[64] = {
   0,   5,  10,  20,  20,  10,   5,   0,
   0,   0,   5,  10,  10,   5,   0,   0,
   0,   5,   5, -10, -10,   0,   5,   0,
-  0,   0,  10,   0, -15,   0,  10,   0
+  0,   0,  5,   0, -15,   0,  10,   0
 };
 
 constexpr Square mirror_score[64] = {
@@ -87,12 +87,12 @@ extern Bitboard white_passed_masks[SQUARE_NB];
 extern Bitboard black_passed_masks[SQUARE_NB];
 
 constexpr int double_pawn_penalty = -10;
-constexpr int isolated_pawn_penalty = -20;
+constexpr int isolated_pawn_penalty = -10;
 constexpr int passed_pawn_bonus[8] = { 200, 150, 100, 75, 50, 30, 10, 0 }; 
 
 constexpr int semi_open_file_score = 10;
 constexpr int open_file_score = 15;
-constexpr int king_shield_bonus = 10;
+constexpr int king_shield_bonus = 5;
 
 void init_evaluation_masks();
 int evaluate(Position* pos);

@@ -231,25 +231,25 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
   int legal_moves = 0;
 
   // null move pruning
-  if (null_pruning && (!pv_node && depth >= 3 && !in_check && pos->ply)) {
+  // if (null_pruning && (!pv_node && depth >= 3 && !in_check && pos->ply)) {
 
-    Position next_pos[1];
-    copy_position(next_pos, pos);
-    make_null_move(next_pos);
+  //   Position next_pos[1];
+  //   copy_position(next_pos, pos);
+  //   make_null_move(next_pos);
 
-    // reduction factor
-    int r = 2;
+  //   // reduction factor
+  //   int r = 2;
 
-    // disable null pruning for next node
-    score = -negamax(next_pos, -beta, - beta + 1, depth - 1 - r, 0, nodes);
+  //   // disable null pruning for next node
+  //   score = -negamax(next_pos, -beta, - beta + 1, depth - 1 - r, 0, nodes);
 
-    // // return 0 if time is up
-    // if(stopped == 1) return 0;
+  //   // // return 0 if time is up
+  //   // if(stopped == 1) return 0;
 
-    if (score >= beta) {
-      return beta;
-    }
-  }
+  //   if (score >= beta) {
+  //     return beta;
+  //   }
+  // }
 
   MoveList move_list[1];
   generate_moves(move_list, pos);
@@ -269,6 +269,8 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
       continue;
     }
     legal_moves++;
+
+    // score = - negamax(next_pos, -beta, -alpha, depth-1, 0, nodes);
 
     // full depth search
     if (moves_searched == 0)
@@ -401,8 +403,8 @@ void search_position(Position* pos, int depth) {
 		// 	break;
 
     // aspiration window
-    alpha = score - 100;
-    beta = score + 100;
+    alpha = score - 50;
+    beta = score + 50;
     
     if (score > -mate_value && score < -mate_score) {
       printf("info score mate %d depth %d nodes %ld time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - starttime);
@@ -416,8 +418,8 @@ void search_position(Position* pos, int depth) {
 
     for (int count = 0; count < pv_length[0]; count++) {
       print_move(pv_table[0][count]);
+      printf(" ");
     }
-    // print new line
     printf("\n");
 
     if ((score > -mate_value && score < -mate_score) || (score > mate_score && score < mate_value))

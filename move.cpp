@@ -16,7 +16,11 @@ int get_move_enpassant_f(Move move) { return (move & 0x400000); }
 int get_move_castling_f(Move move)  { return (move& 0x800000); }
 
 void print_move(Move move) {
-  printf("%s%s%c", square_to_coordinates[get_move_source(move)],
-                    square_to_coordinates[get_move_target(move)],
-                    promoted_pieces.at(get_move_promoted(move)));
+  if (get_move_promoted(move))
+    printf("%s%s%c", square_to_coordinates[get_move_source(move)],
+                     square_to_coordinates[get_move_target(move)],
+                     promoted_pieces.at(get_move_promoted(move)));
+  else
+    printf("%s%s", square_to_coordinates[get_move_source(move)],
+                     square_to_coordinates[get_move_target(move)]);
 }

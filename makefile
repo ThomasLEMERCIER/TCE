@@ -10,6 +10,6 @@ OPTI_FLAG = -O3
 DEBUG_FLAG = -DDEBUG
 
 release:
-	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o tce_cpp.exe
+	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o tce.exe
 debug:
 	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(DEBUG_FLAG) $(SRCS) -o tce_d.exe

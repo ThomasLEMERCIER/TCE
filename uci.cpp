@@ -276,8 +276,9 @@ void parse_go(Position* pos, char *command)
   }
 
   // if depth is not available
+  if(depth == -1)
     // set depth to 64 plies (takes ages to complete...)
-  depth = 6;
+    depth = 64;
 
   // print debug info
   printf("time:%d start:%d stop:%d depth:%d timeset:%d\n",

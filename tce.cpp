@@ -15,6 +15,7 @@
 #include "uci.hpp"
 
 void init_all() {
+  init_evaluation_masks();
   init_attacks();
   init_random_keys();
 }
@@ -31,13 +32,10 @@ int main() {
 
   if (debug) {
     printf("debug mode\n");
-
     Position pos[1];
-    pos->set("1rbk3r/3n4/1p1N1p1n/3Np2p/p1B3p1/4P3/PP1B2PP/2KR3R b - - 4 4");
-    print_board(pos);
-    printf("Evaluation: %d\n", evaluate(pos));
 
-    // uci_loop();
+    pos->set("4r1k1/ppp3pp/n4p2/3Ppq2/4R2P/5N2/PPP2RP1/6K1 w - - 0 26");
+    printf("Evaluation: %d\n", evaluate(pos));
   }
   else
     uci_loop();
