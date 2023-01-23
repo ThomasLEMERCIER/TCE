@@ -332,7 +332,7 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
 }
 
 void make_null_move(Position* pos) {
-  pos->side = pos->side;
+  pos->side = ~pos->side;
   pos->hash_key ^= side_key;
 
   if (pos->enpassant != Square::no_sq) {
@@ -340,8 +340,8 @@ void make_null_move(Position* pos) {
     pos->enpassant = Square::no_sq;
   }
 
-  pos->ply++;
-  pos->repetition_index++;
+  ++pos->ply;
+  ++pos->repetition_index;
   pos->repetition_table[pos->repetition_index] = pos->hash_key;
 }
 

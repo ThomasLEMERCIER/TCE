@@ -160,27 +160,22 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
 
   // null move pruning
   // if (null_pruning && (!pv_node && depth >= 3 && !in_check && pos->ply)) {
-
-  //   Position next_pos[1];
-  //   copy_position(next_pos, pos);
-  //   make_null_move(next_pos);
+  //   Position next_pos = Position(pos);
+  //   make_null_move(&next_pos);
 
   //   // reduction factor
   //   int r = 2;
 
   //   // disable null pruning for next node
-  //   score = -negamax(next_pos, -beta, - beta + 1, depth - 1 - r, 0, nodes);
-
-  //   // // return 0 if time is up
-  //   // if(stopped == 1) return 0;
+  //   score = -negamax(&next_pos, -beta, - beta + 1, depth - r, 0, nodes);
 
   //   if (score >= beta) {
   //     return beta;
   //   }
   // }
+
   Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
   Move best_move;
-
 
   int moves_searched = 0;
   Move current_move;
