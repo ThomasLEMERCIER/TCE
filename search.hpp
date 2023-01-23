@@ -10,14 +10,12 @@
 #include "evaluate.hpp"
 #include "utils.hpp"
 #include "uci.hpp"
+#include "orderer.hpp"
 
 #define infinity 50000
 #define mate_value 49000
 #define mate_score 48000
 #define draw_value 0
-
-constexpr int MAX_PLY = 64;
-
 
 /*    ================================
             Triangular PV table
@@ -40,8 +38,8 @@ constexpr int MAX_PLY = 64;
 */
 
 struct SearchData {
-  int killer_moves[2][MAX_PLY];
-  int history_moves[12][64];
+  KillerMoves killer_moves;
+  HistoryMoves history_moves;
   int pv_length[MAX_PLY];
   Move pv_table[MAX_PLY][MAX_PLY];
 };
@@ -54,10 +52,11 @@ struct SearchData {
 #define hash_flag_beta   2
 
 struct TTEntry {
-  U64 key;    // hash key of position
-  int depth;  // depth to get value
-  int flag;   // flag for the type of node (fail-high/fail-low/PV)
-  int score;  // score (beta/alpha/PV)
+  U64 key;          // hash key of position
+  int depth;        // depth to get value
+  int flag;         // flag for the type of node (fail-high/fail-low/PV)
+  int score;        // score (beta/alpha/PV)
+  Move best_move;   // best move found
 };
 
 class TranspositionTable {
@@ -65,19 +64,14 @@ public:
   TTEntry table[hash_size];
 
 
-  int probe(Position* pos, int alpha, int beta, int depth);
-  void write_entry(Position* pos, int flag, int score, int depth);
+  int probe(Position* pos, int alpha, int beta, int depth, Move& move);
+  void write_entry(Position* pos, int flag, int score, int depth, Move move);
   void clear();
 };
 
 extern TranspositionTable TT;
 extern SearchData sd;
-extern int follow_pv, score_pv;
 
-
-int score_move(Position* pos, Move move);
-void enable_pv_scoring(Position* pos, MoveList *move_list);
-void sort_moves(Position* pos, MoveList *move_list);
 int quiescence(Position* pos, int alpha, int beta, long& nodes);
 int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, long& nodes);
 
@@ -89,32 +83,5 @@ void reset_TT();
 
 constexpr int full_depth_moves = 4;
 constexpr int reduction_limit = 3;
-
-/*                       
-    (Victims) Pawn Knight Bishop   Rook  Queen   King
-  (Attackers)
-        Pawn   105    205    305    405    505    605
-      Knight   104    204    304    404    504    604
-      Bishop   103    203    303    403    503    603
-        Rook   102    202    302    402    502    602
-       Queen   101    201    301    401    501    601
-        King   100    200    300    400    500    600
-*/
-// MVV LVA [attacker][victim]
-const int mvv_lva[12][12] = {
- 	105, 205, 305, 405, 505, 605,  105, 205, 305, 405, 505, 605,
-	104, 204, 304, 404, 504, 604,  104, 204, 304, 404, 504, 604,
-	103, 203, 303, 403, 503, 603,  103, 203, 303, 403, 503, 603,
-	102, 202, 302, 402, 502, 602,  102, 202, 302, 402, 502, 602,
-	101, 201, 301, 401, 501, 601,  101, 201, 301, 401, 501, 601,
-	100, 200, 300, 400, 500, 600,  100, 200, 300, 400, 500, 600,
-
-	105, 205, 305, 405, 505, 605,  105, 205, 305, 405, 505, 605,
-	104, 204, 304, 404, 504, 604,  104, 204, 304, 404, 504, 604,
-	103, 203, 303, 403, 503, 603,  103, 203, 303, 403, 503, 603,
-	102, 202, 302, 402, 502, 602,  102, 202, 302, 402, 502, 602,
-	101, 201, 301, 401, 501, 601,  101, 201, 301, 401, 501, 601,
-	100, 200, 300, 400, 500, 600,  100, 200, 300, 400, 500, 600
-};
 
 #endif

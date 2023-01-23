@@ -1,5 +1,5 @@
 ### Source and object files
-SRCS = bitboard.cpp definition.cpp evaluate.cpp move.cpp movegen.cpp perft.cpp position.cpp rng.cpp search.cpp tce.cpp uci.cpp utils.cpp
+SRCS = bitboard.cpp definition.cpp evaluate.cpp move.cpp movegen.cpp orderer.cpp perft.cpp position.cpp rng.cpp search.cpp tce.cpp uci.cpp utils.cpp
 # OBJS = $(notdir $(SRCS:.cpp=.o))
 
 $(info Source file: $(SRCS))
@@ -13,3 +13,6 @@ release:
 	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o tce.exe
 debug:
 	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(DEBUG_FLAG) $(SRCS) -o tce_d.exe
+profile:
+	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(DEBUG_FLAG) $(SRCS) -g -o tce_profile.exe
+

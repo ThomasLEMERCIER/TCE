@@ -35,10 +35,22 @@ int main() {
     // uci_loop();
 
     Position pos[1];
-    pos->set("4R3/1p3rk1/p4p1p/8/8/5P2/1PP3pB/2K5 b - - 1 36");
-    long n=0;
 
-    printf("Evaluation: %d\n", quiescence(pos, -50000, 5000, n));
+    pos->set(start_position);
+    perft_test(pos, 6);
+
+    // pos->set(tricky_position);
+    // perft_test(pos, 5);
+
+    // pos->set(perft_3);
+    // perft_test(pos, 6);
+
+    // pos->set(perft_4);
+    // perft_test(pos, 5);
+
+    // pos->set(perft_5);
+    // perft_test(pos, 5);
+
   }
   else
     uci_loop();

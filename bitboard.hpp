@@ -12,6 +12,28 @@ constexpr int bishop_magic_size = 512;
 constexpr int rook_magic_size = 4096;
 constexpr int max_magic_size = 4096;
 
+constexpr Bitboard FILE_A_BB = 0x101010101010101ULL;
+constexpr Bitboard FILE_B_BB = FILE_A_BB << 1;
+constexpr Bitboard FILE_C_BB = FILE_A_BB << 2;
+constexpr Bitboard FILE_D_BB = FILE_A_BB << 3;
+constexpr Bitboard FILE_E_BB = FILE_A_BB << 4;
+constexpr Bitboard FILE_F_BB = FILE_A_BB << 5;
+constexpr Bitboard FILE_G_BB = FILE_A_BB << 6;
+constexpr Bitboard FILE_H_BB = FILE_A_BB << 7;
+
+constexpr Bitboard RANK_1_BB = 0xff00000000000000ULL;
+constexpr Bitboard RANK_2_BB = RANK_1_BB >> (8 * 1);
+constexpr Bitboard RANK_3_BB = RANK_1_BB >> (8 * 2);
+constexpr Bitboard RANK_4_BB = RANK_1_BB >> (8 * 3);
+constexpr Bitboard RANK_5_BB = RANK_1_BB >> (8 * 4);
+constexpr Bitboard RANK_6_BB = RANK_1_BB >> (8 * 5);
+constexpr Bitboard RANK_7_BB = RANK_1_BB >> (8 * 6);
+constexpr Bitboard RANK_8_BB = RANK_1_BB >> (8 * 7);
+
+constexpr Bitboard NOT_A_FILE_BB = ~FILE_A_BB;
+constexpr Bitboard NOT_H_FILE_BB = ~FILE_H_BB;
+constexpr Bitboard NOT_AB_FILE_BB = ~(FILE_A_BB | FILE_B_BB);
+constexpr Bitboard NOT_GH_FILE_BB = ~(FILE_G_BB | FILE_H_BB);
 
 extern Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
 extern Bitboard knight_attacks[SQUARE_NB];
@@ -211,32 +233,22 @@ Bitboard get_bit(Bitboard bitboard, Square square);
 void pop_bit(Bitboard& bitboard, Square square);
 Square get_lsb_index(Bitboard bitboard);
 
+template <Direction d>
+Bitboard shift(Bitboard bitboard) { return (d == Direction::LEFT) ? ((bitboard >> 1) & ~FILE_H_BB): (d == Direction::RIGHT) ? ((bitboard << 1) & ~FILE_A_BB) : 
+                                           (d == Direction::UP)   ? (bitboard >> 8): (d == Direction::DOWN) ? (bitboard << 8) : bitboard; };
+
 Bitboard get_file_bb(File file);
 Bitboard get_rank_bb(Rank rank);
 Rank get_rank(Square square);
 File get_file(Square square);
 
-constexpr Bitboard FILE_A_BB = 0x101010101010101ULL;
-constexpr Bitboard FILE_B_BB = FILE_A_BB << 1;
-constexpr Bitboard FILE_C_BB = FILE_A_BB << 2;
-constexpr Bitboard FILE_D_BB = FILE_A_BB << 3;
-constexpr Bitboard FILE_E_BB = FILE_A_BB << 4;
-constexpr Bitboard FILE_F_BB = FILE_A_BB << 5;
-constexpr Bitboard FILE_G_BB = FILE_A_BB << 6;
-constexpr Bitboard FILE_H_BB = FILE_A_BB << 7;
-
-constexpr Bitboard RANK_1_BB = 0xff00000000000000ULL;
-constexpr Bitboard RANK_2_BB = RANK_1_BB >> (8 * 1);
-constexpr Bitboard RANK_3_BB = RANK_1_BB >> (8 * 2);
-constexpr Bitboard RANK_4_BB = RANK_1_BB >> (8 * 3);
-constexpr Bitboard RANK_5_BB = RANK_1_BB >> (8 * 4);
-constexpr Bitboard RANK_6_BB = RANK_1_BB >> (8 * 5);
-constexpr Bitboard RANK_7_BB = RANK_1_BB >> (8 * 6);
-constexpr Bitboard RANK_8_BB = RANK_1_BB >> (8 * 7);
-
-constexpr Bitboard NOT_A_FILE_BB = ~FILE_A_BB;
-constexpr Bitboard NOT_H_FILE_BB = ~FILE_H_BB;
-constexpr Bitboard NOT_AB_FILE_BB = ~(FILE_A_BB | FILE_B_BB);
-constexpr Bitboard NOT_GH_FILE_BB = ~(FILE_G_BB | FILE_H_BB);
+template <Piece piece>
+Bitboard get_attacks_bb(Square square, Bitboard occupancy) {
+  return (piece == Piece::N) || (piece == Piece::n) ? get_knight_attacks(square)            :
+         (piece == Piece::B) || (piece == Piece::b) ? get_bishop_attacks(square, occupancy) :
+         (piece == Piece::R) || (piece == Piece::r) ? get_rook_attacks(square, occupancy)   :
+         (piece == Piece::Q) || (piece == Piece::q) ? get_queen_attacks(square, occupancy)  :
+         (piece == Piece::K) || (piece == Piece::k) ? get_king_attacks(square)              : 0ULL;
+}
 
 #endif

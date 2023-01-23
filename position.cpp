@@ -160,9 +160,6 @@ int is_square_attacked(Position* pos, Square square, Color side) {
 
 int make_move(Position* pos, Move move, Move_Type move_flag) {
   if (move_flag == Move_Type::all_moves) {
-    Position current_pos[1];
-    copy_position(current_pos, pos);
-
     // parse move
     Square source_square = get_move_source(move);
     Square target_square = get_move_target(move);
@@ -292,7 +289,6 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
 
     // make sure that king is not in check
     if (is_square_attacked(pos, (pos->side == Color::white) ? get_lsb_index(pos->bitboards[k]) : get_lsb_index(pos->bitboards[K]), pos->side)) {
-      copy_position(pos, current_pos);
       return 0;
     }
     else {
@@ -301,7 +297,7 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
   }
   else {
     // check if the move is a capture
-    if (get_move_capture_f(move)) {
+    if (get_move_capture_f(move) || get_move_enpassant_f(move)) {
       return make_move(pos, move, Move_Type::all_moves);
     }
     else

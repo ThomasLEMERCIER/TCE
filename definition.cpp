@@ -2,6 +2,8 @@
 
 Color operator~(Color c) { return Color(c ^ 1); }
 
+Direction operator~(Direction d) { return Direction(-d); };
+
 Piece& operator++(Piece& d) { return d = Piece(int(d) + 1); }
 Piece& operator--(Piece& d) { return d = Piece(int(d) - 1); }
 

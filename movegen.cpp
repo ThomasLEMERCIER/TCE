@@ -2,345 +2,199 @@
 
 #include <stdio.h>
 
-void generate_moves(MoveList *move_list, Position* pos) {
+void generate_moves(Position* pos, MoveList* move_list) {
   move_list->move_count = 0;
 
-  Square source_square, target_square;
-  Bitboard bitboard, attacks;
-
-  // loop over all piece
-  for (Piece piece = Piece::P; piece <= Piece::k; ++piece) {
-    bitboard = pos->bitboards[piece];
-
-    // generate white pawns & white king castling moves
-    if (pos->side == Color::white) {
-      if (piece == Piece::P) {
-        while  (bitboard) {
-          source_square = get_lsb_index(bitboard);
-          target_square = shift<UP>(source_square);
-
-          // quiet pawn move
-          if (!(target_square < Square::a8) && !get_bit(pos->occupancies[both], target_square)) {
-            // pawn promotion
-            if (source_square >= Square::a7 && source_square <= Square::h7) {
-              // addd move into a move list            
-              add_move(move_list, encode_move(source_square, target_square, piece, Q, 0, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, N, 0, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, R, 0, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, B, 0, 0, 0, 0));
-            }
-            else {
-              // one square pawn move
-              add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-
-              // double square pawn move
-              target_square = (Square)(source_square - 16);
-              if ((source_square >= Square::a2 && source_square <= Square::h2) && !get_bit(pos->occupancies[Color::both], target_square))
-                add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 1, 0, 0));
-
-            }
-          }
-
-          // init pawn attacks bitboard
-          attacks = get_pawn_attacks(source_square, pos->side) & pos->occupancies[Color::black];
-
-          // generate pawn captures
-          while (attacks)
-          {
-            target_square = get_lsb_index(attacks);
-            
-            if (source_square >= Square::a7 && source_square <= Square::h7) {
-              add_move(move_list, encode_move(source_square, target_square, piece, Q, 1, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, N, 1, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, R, 1, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, B, 1, 0, 0, 0));
-            }
-            else
-              add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-            pop_bit(attacks, target_square);
-          }
-
-          // generate enpassant captures
-          if (pos->enpassant != Square::no_sq)
-          {
-              // lookup pawn attacks and bitwise AND with enpassant square (bit)
-              Bitboard enpassant_attacks = get_pawn_attacks(source_square, pos->side) & (1ULL << pos->enpassant);
-              
-              // make sure enpassant capture available
-              if (enpassant_attacks)
-              {
-                // init enpassant capture target square
-                Square target_enpassant = get_lsb_index(enpassant_attacks);
-                add_move(move_list, encode_move(source_square, target_enpassant, piece, (Piece)0, 1, 0, 1, 0));
-              }
-          }
-
-          // pop lsb from piece bitboard copy
-          pop_bit(bitboard, source_square);
-        }
-        // white king bitboard index
-      }
-      else if (piece == Piece::K) {
-        // king side castling is available
-        if (pos->castle_rights & Castle_Right::wk) {
-          // make sure square betwwen king and king's rook are empty
-          if (!get_bit(pos->occupancies[Color::both], Square::f1) && !get_bit(pos->occupancies[Color::both], Square::g1))
-          {
-            // make sure king and moving square are not attack
-            if (!is_square_attacked(pos, Square::e1, Color::black) && !is_square_attacked(pos, Square::f1, Color::black)) {
-              add_move(move_list, encode_move(Square::e1, Square::g1, piece, (Piece)0, 0, 0, 0, 1));
-            }
-          }
-        }
-        if (pos->castle_rights & Castle_Right::wq) {
-          // make sure square betwwen king and queen's rook are empty
-          if (!get_bit(pos->occupancies[Color::both], Square::b1) && !get_bit(pos->occupancies[Color::both], Square::c1)& !get_bit(pos->occupancies[Color::both], Square::d1))
-          {
-            // make sure king and moving square are not attack
-            if (!is_square_attacked(pos, Square::d1, Color::black) && !is_square_attacked(pos, Square::e1, Color::black)) {
-              add_move(move_list, encode_move(Square::e1, Square::c1, piece, (Piece)0, 0, 0, 0, 1));
-            }
-          }
-        }
-      }
-    }
-    else {
-      // black pawn bitboard index
-      if (piece == Piece::p) {
-        // loop over black pawns
-        while  (bitboard) {
-          source_square = get_lsb_index(bitboard);
-          target_square = shift<DOWN>(source_square);
-
-          if (!(target_square > Square::h1) && !get_bit(pos->occupancies[Color::both], target_square)) {
-            // pawn promotion
-            if (source_square >= Square::a2 && source_square <= Square::h2) {
-              // addd move into a move list
-              add_move(move_list, encode_move(source_square, target_square, piece, q, 0, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, n, 0, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, r, 0, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, b, 0, 0, 0, 0));
-            }
-            else {
-              // one square pawn move
-              add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-
-              // double square pawn move
-              target_square = Square(source_square + 16);
-              if ((source_square >= Square::a7 && source_square <= Square::h7) && !get_bit(pos->occupancies[Color::both], target_square))
-                add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 1, 0, 0));
-            }
-          }
-
-          // init pawn attacks bitboard
-          attacks = get_pawn_attacks(source_square, pos->side) & pos->occupancies[Color::white];
-
-          // generate pawn captures
-          while (attacks)
-          {
-            // init target square
-            target_square = get_lsb_index(attacks);
-            
-            if (source_square >= Square::a2 && source_square <= Square::h2) {
-              add_move(move_list, encode_move(source_square, target_square, piece, q, 1, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, n, 1, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, r, 1, 0, 0, 0));
-              add_move(move_list, encode_move(source_square, target_square, piece, b, 1, 0, 0, 0));
-            }
-            else
-              add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-            pop_bit(attacks, target_square);
-          }
-
-          // generate enpassant captures
-          if (pos->enpassant != Square::no_sq)
-          {
-              // lookup pawn attacks and bitwise AND with enpassant square (bit)
-              Bitboard enpassant_attacks = get_pawn_attacks(source_square, pos->side) & (1ULL << pos->enpassant);
-              
-              // make sure enpassant capture available
-              if (enpassant_attacks)
-              {
-                // init enpassant capture target square
-                Square target_enpassant = get_lsb_index(enpassant_attacks);
-                add_move(move_list, encode_move(source_square, target_enpassant, piece, (Piece)0, 1, 0, 1, 0));
-              }
-          }
-          
-          // pop lsb from piece bitboard copy
-          pop_bit(bitboard, source_square);
-        }
-      }
-      else if (piece == k) {
-        // king side castling is available
-        if (pos->castle_rights & Castle_Right::bk) {
-          // make sure square betwwen king and king's rook are empty
-          if (!get_bit(pos->occupancies[Color::both], Square::f8) && !get_bit(pos->occupancies[Color::both], Square::g8))
-          {
-            // make sure king and moving square are not attack
-            if (!is_square_attacked(pos, Square::e8, Color::white) && !is_square_attacked(pos, Square::f8, Color::white)) {
-              add_move(move_list, encode_move(Square::e8, Square::g8, piece, (Piece)0, 0, 0, 0, 1));
-            }
-          }
-        }
-        if (pos->castle_rights & Castle_Right::bq) {
-          // make sure square betwwen king and queen's rook are empty
-          if (!get_bit(pos->occupancies[Color::both], Square::b8) && !get_bit(pos->occupancies[Color::both], Square::c8)& !get_bit(pos->occupancies[Color::both], Square::d8))
-          {
-            // make sure king and moving square are not attack
-            if (!is_square_attacked(pos, Square::d8, Color::white) && !is_square_attacked(pos, Square::e8, Color::white)) {
-              add_move(move_list, encode_move(Square::e8, Square::c8, piece, (Piece)0, 0, 0, 0, 1));
-            }
-          }
-        }
-      }
-    }
-
-    // generate knight moves
-    if ((pos->side == Color::white) ? piece == Piece::N : piece == Piece::n) {
-      while  (bitboard) {
-        // init source square
-        source_square = get_lsb_index(bitboard);
-
-        // init pawn attacks bitboard
-        attacks = get_knight_attacks(source_square) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
-
-        // generate pawn captures
-        while (attacks)
-        {
-          // init target square
-          target_square = get_lsb_index(attacks);
-
-          if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-          else
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-          pop_bit(attacks, target_square);
-        }
-        // pop lsb from piece bitboard copy
-        pop_bit(bitboard, source_square);
-      }
-    }
-
-    // generate bishop moves
-    if ((pos->side == Color::white) ? piece == Piece::B : piece == Piece::b) {
-      while  (bitboard) {
-        // init source square
-        source_square = get_lsb_index(bitboard);
-
-        // init pawn attacks bitboard
-        attacks = get_bishop_attacks(source_square, pos->occupancies[both]) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
-
-        // generate pawn captures
-        while (attacks)
-        {
-          // init target square
-          target_square = get_lsb_index(attacks);
-
-          if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-          else
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-          pop_bit(attacks, target_square);
-        }
-        // pop lsb from piece bitboard copy
-        pop_bit(bitboard, source_square);
-      }
-    }
-
-    // generate rook moves
-    if ((pos->side == Color::white) ? piece == Piece::R : piece == Piece::r) {
-      while  (bitboard) {
-        // init source square
-        source_square = get_lsb_index(bitboard);
-
-        // init pawn attacks bitboard
-        attacks = get_rook_attacks(source_square, pos->occupancies[Color::both]) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
-
-        // generate pawn captures
-        while (attacks)
-        {
-          // init target square
-          target_square = get_lsb_index(attacks);
-
-          if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-          else
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-          pop_bit(attacks, target_square);
-        }
-        // pop lsb from piece bitboard copy
-        pop_bit(bitboard, source_square);
-      }
-    }
-
-    // generate queen moves
-    if ((pos->side == Color::white) ? piece == Piece::Q : piece == Piece::q) {
-      while  (bitboard) {
-        // init source square
-        source_square = get_lsb_index(bitboard);
-
-        attacks = get_queen_attacks(source_square, pos->occupancies[Color::both]) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
-
-        while (attacks)
-        {
-          // init target square
-          target_square = get_lsb_index(attacks);
-
-          if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-          else
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-          pop_bit(attacks, target_square);
-        }
-        // pop lsb from piece bitboard copy
-        pop_bit(bitboard, source_square);
-      }
-    }
-
-    // generate king moves
-    if ((pos->side == Color::white) ? piece == Piece::K : piece == Piece::k) {
-      while  (bitboard) {
-        // init source square
-        source_square = get_lsb_index(bitboard);
-
-        attacks = get_king_attacks(source_square) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
-
-        while (attacks)
-        {
-          // init target square
-          target_square = get_lsb_index(attacks);
-
-          if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
-          else
-            add_move(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
-
-          pop_bit(attacks, target_square);
-        }
-        // pop lsb from piece bitboard copy
-        pop_bit(bitboard, source_square);
-      }
-    }
-
+  generate_castle_moves(pos, move_list);
+  if (pos->side == Color::white) {
+    generate_pawn_moves<Color::white>(pos, move_list);
+    generate_piece_moves<Piece::N>(pos, move_list);
+    generate_piece_moves<Piece::B>(pos, move_list);
+    generate_piece_moves<Piece::R>(pos, move_list);
+    generate_piece_moves<Piece::Q>(pos, move_list);
+    generate_piece_moves<Piece::K>(pos, move_list);
+  } else {
+    generate_pawn_moves<Color::black>(pos, move_list);
+    generate_piece_moves<Piece::n>(pos, move_list);
+    generate_piece_moves<Piece::b>(pos, move_list);
+    generate_piece_moves<Piece::r>(pos, move_list);
+    generate_piece_moves<Piece::q>(pos, move_list);
+    generate_piece_moves<Piece::k>(pos, move_list);
   }
 }
 
-void add_move(MoveList* move_list, Move move) {
-  move_list->moves[move_list->move_count] = move; move_list->move_count++;
+template<Piece piece>
+void generate_piece_moves(Position* pos, MoveList* move_list) {
+  Bitboard bb = pos->bitboards[piece];
+  Bitboard attacks;
+  Square source_square, target_square;
+
+  while (bb) {
+    source_square = get_lsb_index(bb);
+    attacks = get_attacks_bb<piece>(source_square, pos->occupancies[Color::both]) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
+
+    while (attacks)
+    {
+      target_square = get_lsb_index(attacks);
+
+      if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
+        move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
+      else
+        move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
+
+      pop_bit(attacks, target_square);
+    }
+    pop_bit(bb, source_square);
+  }
+}
+
+template <Color c>
+void generate_pawn_moves(Position* pos, MoveList* move_list) {
+  constexpr Piece piece = (c == Color::white) ? Piece::P : Piece::p;
+  constexpr Direction forward  = (c == Color::white) ? Direction::UP : Direction::DOWN;
+  constexpr Direction backward  = (c == Color::white) ? Direction::DOWN : Direction::UP;
+  constexpr Bitboard RelativeRank7 = (c == Color::white) ? RANK_7_BB : RANK_2_BB;
+  constexpr Bitboard RelativeRank3 = (c == Color::white) ? RANK_3_BB : RANK_6_BB;
+
+  Bitboard pawns = pos->bitboards[piece];
+  Bitboard pawnsOn7 = pawns & RelativeRank7;
+  Bitboard pawnsNotOn7 = pawns & ~RelativeRank7;
+
+  Bitboard emptySquares = ~pos->occupancies[Color::both];
+  Bitboard enemies = (pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white];
+
+  Square source_square, target_square;
+
+  Bitboard b1, b2, b3;
+
+  // Quiet Move
+  b1 = shift<forward>(pawnsNotOn7) & emptySquares; // One forward
+  b2 = shift<forward>(b1 & RelativeRank3) & emptySquares; // Double push on second rank = (one forward rank 2 + one forward rank 3)
+  while (b1) {
+    target_square = get_lsb_index(b1);
+    source_square = shift<backward>(target_square);
+    move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
+    pop_bit(b1, target_square);
+  }
+
+  while (b2) {
+    target_square = get_lsb_index(b2);
+    source_square = shift<backward>(shift<backward>(target_square));
+    move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 1, 0, 0));
+    pop_bit(b2, target_square);
+  }
+
+  // Promotions and underpromotions
+  if (pawnsOn7) {
+    b1 = shift<RIGHT>(shift<forward>(pawnsOn7)) & enemies; // capture promotion
+    b2 = shift<LEFT>(shift<forward>(pawnsOn7)) & enemies; // capture promotion
+    b3 = shift<forward>(pawnsOn7) & emptySquares; // forward promotion
+
+    while (b1) {
+      target_square = get_lsb_index(b1);
+      source_square = shift<LEFT>(shift<backward>(target_square));
+      for (auto piece_prom : (pos->side == Color::white) ? WhitePromPiece : BlackPromPiece)
+        move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 1, 0, 0, 0));            
+      pop_bit(b1, target_square);
+    }
+
+    while (b2) {
+      target_square = get_lsb_index(b2);
+      source_square = shift<RIGHT>(shift<backward>(target_square));
+      for (auto piece_prom : (pos->side == Color::white) ? WhitePromPiece : BlackPromPiece)
+        move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 1, 0, 0, 0));            
+      pop_bit(b2, target_square);
+    }
+
+    while (b3) {
+      target_square = get_lsb_index(b3);
+      source_square = shift<backward>(target_square);
+      for (auto piece_prom : (pos->side == Color::white) ? WhitePromPiece : BlackPromPiece)
+        move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 0, 0, 0, 0));            
+      pop_bit(b3, target_square);
+    }
+  }
+
+  // Standard and en passant captures
+  b1 = shift<RIGHT>(shift<forward>(pawnsNotOn7)) & enemies;
+  b2 = shift<LEFT>(shift<forward>(pawnsNotOn7)) & enemies;
+
+  while (b1)
+  {
+    target_square = get_lsb_index(b1);
+    source_square = shift<LEFT>(shift<backward>(target_square));
+    move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));            
+    pop_bit(b1, target_square);
+  }
+
+  while (b2)
+  {
+    target_square = get_lsb_index(b2);
+    source_square = shift<RIGHT>(shift<backward>(target_square));
+    move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));            
+    pop_bit(b2, target_square);
+  }
+
+  if (pos->enpassant != Square::no_sq)
+  {
+    b1 = pawnsNotOn7 & get_pawn_attacks(pos->enpassant, ~pos->side); // symetry of attacks
+    while (b1)
+    {
+      source_square = get_lsb_index(b1);
+      move_push(move_list, encode_move(source_square, pos->enpassant, piece, (Piece)0, 0, 0, 1, 0));            
+      pop_bit(b1, source_square);
+    }
+  }
+}
+
+void generate_castle_moves(Position* pos, MoveList* move_list) {
+  if (pos->side == Color::white){
+    if (pos->castle_rights & Castle_Right::wk) {
+      if (!get_bit(pos->occupancies[Color::both], Square::f1) && 
+          !get_bit(pos->occupancies[Color::both], Square::g1) &&
+          !is_square_attacked(pos, Square::e1, Color::black)  &&
+          !is_square_attacked(pos, Square::f1, Color::black))
+            move_push(move_list, encode_move(Square::e1, Square::g1, Piece::K, (Piece)0, 0, 0, 0, 1));
+    }
+    if (pos->castle_rights & Castle_Right::wq) {
+      if (!get_bit(pos->occupancies[Color::both], Square::b1) && 
+          !get_bit(pos->occupancies[Color::both], Square::c1) &&
+          !get_bit(pos->occupancies[Color::both], Square::d1) &&
+          !is_square_attacked(pos, Square::d1, Color::black)  &&
+          !is_square_attacked(pos, Square::e1, Color::black))
+            move_push(move_list, encode_move(Square::e1, Square::c1, Piece::K, (Piece)0, 0, 0, 0, 1));
+    }
+  }
+  else {
+    if (pos->castle_rights & Castle_Right::bk) {
+      if (!get_bit(pos->occupancies[Color::both], Square::f8) && 
+          !get_bit(pos->occupancies[Color::both], Square::g8) &&
+          !is_square_attacked(pos, Square::e8, Color::white)  &&
+          !is_square_attacked(pos, Square::f8, Color::white))
+            move_push(move_list, encode_move(Square::e8, Square::g8, Piece::k, (Piece)0, 0, 0, 0, 1));
+    }
+    if (pos->castle_rights & Castle_Right::bq) {
+      if (!get_bit(pos->occupancies[Color::both], Square::b8) &&
+          !get_bit(pos->occupancies[Color::both], Square::c8) && 
+          !get_bit(pos->occupancies[Color::both], Square::d8) &&
+          !is_square_attacked(pos, Square::d8, Color::white)  &&
+          !is_square_attacked(pos, Square::e8, Color::white))
+            move_push(move_list, encode_move(Square::e8, Square::c8, Piece::k, (Piece)0, 0, 0, 0, 1));
+    }
+  }
+}
+
+void move_push(MoveList* move_list, Move move) {
+  move_list->moves[move_list->move_count].move = move;
+  move_list->moves[move_list->move_count].score = 0;
+  move_list->move_count++;
 }
 
 void print_move_list(MoveList* move_list) {
   printf("  move    piece   double   enpassant   castling\n\n");
   for (int count = 0; count < move_list->move_count; count++)
   {
-    Move move = move_list->moves[count];
+    Move move = move_list->moves[count].move;
 
     Square source_square = get_move_source(move);
     Square target_square = get_move_target(move);

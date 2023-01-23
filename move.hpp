@@ -18,6 +18,13 @@
 
 */
 
+struct MoveExt
+{
+  Move move;
+  int score;
+};
+
+
 Move encode_move(Square source, Square target, Piece piece, Piece promoted, int capture_f, int double_f, int enpassant_f, int castling_f);
 
 Square get_move_source(Move move);

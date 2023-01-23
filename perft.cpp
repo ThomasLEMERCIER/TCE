@@ -11,16 +11,16 @@ void perft_driver(Position* pos, int depth, long& nodes) {
   else {
 
     MoveList move_list[1];
-    generate_moves(move_list, pos);
+    generate_moves(pos, move_list);
 
     for (int count = 0; count < move_list->move_count; count++) {
       Position next_pos[1];
       copy_position(next_pos, pos);
 
-      if (!make_move(next_pos, move_list->moves[count], all_moves))
+      if (!make_move(next_pos, move_list->moves[count].move, all_moves))
         continue;
 
-      perft_driver(next_pos, depth - 1, nodes);
+       perft_driver(next_pos, depth - 1, nodes);
     }
   }
 }
@@ -32,13 +32,13 @@ void perft_test(Position* pos, int depth) {
   long nodes = 0;
 
   MoveList move_list[1];
-  generate_moves(move_list, pos);
+  generate_moves(pos, move_list);
 
   for (int count = 0; count < move_list->move_count; count++) {
     Position next_pos[1];
     copy_position(next_pos, pos);
 
-    if (!make_move(next_pos, move_list->moves[count], all_moves))
+    if (!make_move(next_pos, move_list->moves[count].move, all_moves))
       continue;
 
     long cummulative_nodes = nodes;
@@ -46,9 +46,9 @@ void perft_test(Position* pos, int depth) {
     perft_driver(next_pos, depth - 1, nodes);
 
     long old_nodes = nodes - cummulative_nodes;
-    printf("    move: %s%s%c  nodes : %ld\n", square_to_coordinates[get_move_source(move_list->moves[count])],
-                                              square_to_coordinates[get_move_target(move_list->moves[count])],
-                                              (get_move_promoted(move_list->moves[count])) ? ascii_pieces[get_move_promoted(move_list->moves[count])] : ' ',
+    printf("    move: %s%s%c  nodes : %ld\n", square_to_coordinates[get_move_source(move_list->moves[count].move)],
+                                              square_to_coordinates[get_move_target(move_list->moves[count].move)],
+                                              (get_move_promoted(move_list->moves[count].move)) ? ascii_pieces[get_move_promoted(move_list->moves[count].move)] : ' ',
                                               old_nodes);
   }
 

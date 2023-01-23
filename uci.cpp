@@ -111,14 +111,14 @@ void communicate() {
 Move parse_move(Position* pos, char *move_string) {
   // generate moves
   MoveList move_list[1];
-  generate_moves(move_list, pos);
+  generate_moves(pos, move_list);
 
   // parse squares
   int source_square = (move_string[0] - 'a') + 8 * (8 - (move_string[1] - '0'));
   int target_square = (move_string[2] - 'a') + 8 * (8 - (move_string[3] - '0'));
 
   for (int count = 0; count < move_list->move_count; count++) {
-    Move move = move_list->moves[count];
+    Move move = move_list->moves[count].move;
 
     if (source_square == get_move_source(move) && target_square == get_move_target(move)) {
 
