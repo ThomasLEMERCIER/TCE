@@ -99,14 +99,13 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   int moves_searched = 0;
   Move current_move;
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
-    Position next_pos[1];
-    copy_position(next_pos, pos);
+    Position next_pos = Position(pos);
 
-    if (!make_move(next_pos, current_move, only_captures))  {
+    if (!make_move(&next_pos, current_move, only_captures))  {
       continue;
     }
   
-    int score = -quiescence(next_pos, -beta, -alpha, nodes);
+    int score = -quiescence(&next_pos, -beta, -alpha, nodes);
 
     if(get_stop_flag()) return 0;
     
@@ -187,10 +186,9 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
   Move current_move;
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     if (get_stop_flag()) return 0;
-    Position next_pos[1];
-    copy_position(next_pos, pos);
+    Position next_pos = Position(pos);
 
-    if (!make_move(next_pos, current_move, all_moves)) {
+    if (!make_move(&next_pos, current_move, all_moves)) {
       continue;
     }
     legal_moves++;
@@ -200,14 +198,14 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
     // full depth search
     if (moves_searched == 0)
       // do normal alpha beta search
-      score = -negamax(next_pos, -beta, -alpha, depth - 1, 1, nodes);
+      score = -negamax(&next_pos, -beta, -alpha, depth - 1, 1, nodes);
     // late move reduction (LMR)
     else
     {
       // condition to consider LMR
       if(lmr_condition(current_move, moves_searched, in_check, depth)) {
         // search current move with reduced depth:
-        score = -negamax(next_pos, -alpha - 1, -alpha, depth - 2, 1, nodes);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - 2, 1, nodes);
       }
       else {
         score = alpha + 1;
@@ -216,10 +214,10 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
       // PVS
       if(score > alpha)
       {
-        score = -negamax(next_pos, -alpha - 1, -alpha, depth-1, 1, nodes);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, 1, nodes);
     
         if((score > alpha) && (score < beta))
-          score = -negamax(next_pos, -beta, -alpha, depth-1, 1, nodes);
+          score = -negamax(&next_pos, -beta, -alpha, depth-1, 1, nodes);
       }
     }
 

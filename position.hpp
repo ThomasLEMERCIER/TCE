@@ -16,6 +16,8 @@ extern U64 castle_keys[64];
 class Position {
 public:
   Position() = default;
+  Position(Position* pos);
+
 
   Bitboard bitboards[PIECE_NB];
   Bitboard occupancies[OCCUPANCY_NB];

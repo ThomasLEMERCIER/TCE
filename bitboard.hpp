@@ -35,6 +35,17 @@ constexpr Bitboard NOT_H_FILE_BB = ~FILE_H_BB;
 constexpr Bitboard NOT_AB_FILE_BB = ~(FILE_A_BB | FILE_B_BB);
 constexpr Bitboard NOT_GH_FILE_BB = ~(FILE_G_BB | FILE_H_BB);
 
+constexpr Bitboard SquareBB[SQUARE_NB] = {
+  (1ULL << a8), (1ULL << b8), (1ULL << c8), (1ULL << d8), (1ULL << e8), (1ULL << f8), (1ULL << g8), (1ULL << h8),
+  (1ULL << a7), (1ULL << b7), (1ULL << c7), (1ULL << d7), (1ULL << e7), (1ULL << f7), (1ULL << g7), (1ULL << h7),
+  (1ULL << a6), (1ULL << b6), (1ULL << c6), (1ULL << d6), (1ULL << e6), (1ULL << f6), (1ULL << g6), (1ULL << h6),
+  (1ULL << a5), (1ULL << b5), (1ULL << c5), (1ULL << d5), (1ULL << e5), (1ULL << f5), (1ULL << g5), (1ULL << h5),
+  (1ULL << a4), (1ULL << b4), (1ULL << c4), (1ULL << d4), (1ULL << e4), (1ULL << f4), (1ULL << g4), (1ULL << h4),
+  (1ULL << a3), (1ULL << b3), (1ULL << c3), (1ULL << d3), (1ULL << e3), (1ULL << f3), (1ULL << g3), (1ULL << h3),
+  (1ULL << a2), (1ULL << b2), (1ULL << c2), (1ULL << d2), (1ULL << e2), (1ULL << f2), (1ULL << g2), (1ULL << h2),
+  (1ULL << a1), (1ULL << b1), (1ULL << c1), (1ULL << d1), (1ULL << e1), (1ULL << f1), (1ULL << g1), (1ULL << h1),
+};
+
 extern Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
 extern Bitboard knight_attacks[SQUARE_NB];
 extern Bitboard king_attacks[SQUARE_NB];

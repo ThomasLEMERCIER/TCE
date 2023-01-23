@@ -6,6 +6,20 @@ U64 side_key;
 U64 enpassant_keys[64];
 U64 castle_keys[64];
 
+Position::Position(Position* pos) {
+  memcpy(bitboards, pos->bitboards, sizeof(bitboards));
+  memcpy(occupancies, pos->occupancies, sizeof(occupancies));
+  memcpy(repetition_table, repetition_table, sizeof(repetition_table));
+  
+  side = pos->side;
+  enpassant = pos->enpassant;
+  castle_rights = pos->castle_rights;
+
+  hash_key = pos->hash_key;
+  repetition_index = pos->repetition_index;
+  ply = pos->ply;
+};
+
 void Position::set(const char* fenStr) {
   memset(this, 0, sizeof(Position));
 
@@ -175,6 +189,10 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
     set_bit(pos->bitboards[piece], target_square);
     pos->hash_key ^= piece_keys[piece][source_square];
     pos->hash_key ^= piece_keys[piece][target_square];
+    pop_bit(pos->occupancies[pos->side], source_square);
+    pop_bit(pos->occupancies[Color::both], source_square);
+    set_bit(pos->occupancies[pos->side], target_square);
+    set_bit(pos->occupancies[Color::both], target_square);
 
     // handle capture
     if (capture_f) {
@@ -188,6 +206,7 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
           break;
         }
       }
+      pop_bit(pos->occupancies[~pos->side], target_square);
     }
 
     // handle pawn promotion
@@ -203,12 +222,15 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
       if (pos->side == Color::white) {
         pop_bit(pos->bitboards[p], shift<DOWN>(target_square));
         pos->hash_key ^= piece_keys[p][shift<DOWN>(target_square)];
+        pop_bit(pos->occupancies[Color::black], shift<DOWN>(target_square));
+        pop_bit(pos->occupancies[Color::both], shift<DOWN>(target_square));
       }
       else {
         pop_bit(pos->bitboards[P], shift<UP>(target_square));
         pos->hash_key ^= piece_keys[P][shift<UP>(target_square)];
+        pop_bit(pos->occupancies[Color::white], shift<UP>(target_square));
+        pop_bit(pos->occupancies[Color::both], shift<UP>(target_square));
       }
- 
     }
 
     // reset enpassant square
@@ -238,24 +260,40 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
           pop_bit(pos->bitboards[Piece::R], Square::h1);
           pos->hash_key ^= piece_keys[Piece::R][Square::f1];
           pos->hash_key ^= piece_keys[Piece::R][Square::h1];
+          set_bit(pos->occupancies[Color::white], Square::f1);
+          pop_bit(pos->occupancies[Color::white], Square::h1);
+          set_bit(pos->occupancies[Color::both], Square::f1);
+          pop_bit(pos->occupancies[Color::both], Square::h1);
           break;
         case Square::c1:
           set_bit(pos->bitboards[Piece::R], Square::d1);
           pop_bit(pos->bitboards[Piece::R], Square::a1);
           pos->hash_key ^= piece_keys[Piece::R][Square::d1];
           pos->hash_key ^= piece_keys[Piece::R][Square::a1];
+          set_bit(pos->occupancies[Color::white], Square::d1);
+          pop_bit(pos->occupancies[Color::white], Square::a1);
+          set_bit(pos->occupancies[Color::both], Square::d1);
+          pop_bit(pos->occupancies[Color::both], Square::a1);
           break;
         case Square::g8:
           set_bit(pos->bitboards[Piece::r], Square::f8);
           pop_bit(pos->bitboards[Piece::r], Square::h8);
           pos->hash_key ^= piece_keys[Piece::r][Square::f8];
           pos->hash_key ^= piece_keys[Piece::r][Square::h8];
+          set_bit(pos->occupancies[Color::black], Square::f8);
+          pop_bit(pos->occupancies[Color::black], Square::h8);
+          set_bit(pos->occupancies[Color::both], Square::f8);
+          pop_bit(pos->occupancies[Color::both], Square::h8);
           break;
         case Square::c8:
           set_bit(pos->bitboards[Piece::r], Square::d8);
           pop_bit(pos->bitboards[Piece::r], Square::a8);
           pos->hash_key ^= piece_keys[Piece::r][Square::d8];
           pos->hash_key ^= piece_keys[Piece::r][Square::a8];
+          set_bit(pos->occupancies[Color::black], Square::d8);
+          pop_bit(pos->occupancies[Color::black], Square::a8);
+          set_bit(pos->occupancies[Color::both], Square::d8);
+          pop_bit(pos->occupancies[Color::both], Square::a8);
           break;
         }
     }
@@ -266,25 +304,12 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
     pos->castle_rights &= castling_rights[target_square];
     pos->hash_key ^= castle_keys[pos->castle_rights];
 
-    // reset occupancies
-    memset(pos->occupancies, 0ULL, sizeof(pos->occupancies));
-
-    // loop over white pieces bitboards
-    for (Piece piece = Piece::P; piece <= Piece::K; ++piece)
-      pos->occupancies[Color::white] |= pos->bitboards[piece];
-    // loop over black pieces bitboards
-    for (Piece piece = Piece::p; piece <= Piece::k; ++piece)
-      pos->occupancies[Color::black] |= pos->bitboards[piece];
-
-    pos->occupancies[Color::both] |= pos->occupancies[Color::white];
-    pos->occupancies[Color::both] |= pos->occupancies[Color::black];
-
     // change side
     pos->side = ~pos->side;
     pos->hash_key ^= side_key;
 
-    pos->ply++;
-    pos->repetition_index++;
+    ++pos->ply;
+    ++pos->repetition_index;
     pos->repetition_table[pos->repetition_index] = pos->hash_key;
 
     // make sure that king is not in check

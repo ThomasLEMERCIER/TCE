@@ -343,18 +343,16 @@ int count_bits(Bitboard bitboard) {
 }
 
 void set_bit(Bitboard& bitboard, Square square) {
-  bitboard |= (1ULL << square);
+  bitboard |= SquareBB[square];
 }
 
 Bitboard get_bit(Bitboard bitboard, Square square) {
-  U64 index = (1ULL << square);
-  U64 result = bitboard & index;
-  return result;
+  return bitboard & SquareBB[square];
 } 
 
 void pop_bit(Bitboard& bitboard, Square square) {
   if (get_bit(bitboard, square))
-    bitboard ^= (1ULL << square);
+    bitboard ^= SquareBB[square];
 }
 
 Square get_lsb_index(Bitboard bitboard) {
