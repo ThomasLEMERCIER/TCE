@@ -9,7 +9,7 @@ U64 castle_keys[64];
 Position::Position(Position* pos) {
   memcpy(bitboards, pos->bitboards, sizeof(bitboards));
   memcpy(occupancies, pos->occupancies, sizeof(occupancies));
-  memcpy(repetition_table, repetition_table, sizeof(repetition_table));
+  memcpy(repetition_table, pos->repetition_table, sizeof(repetition_table));
   
   side = pos->side;
   enpassant = pos->enpassant;
