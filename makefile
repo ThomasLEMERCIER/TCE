@@ -1,18 +1,32 @@
-### Source and object files
+### Source files
 SRCS = bitboard.cpp definition.cpp evaluate.cpp move.cpp movegen.cpp orderer.cpp perft.cpp position.cpp rng.cpp search.cpp tce.cpp uci.cpp utils.cpp
-# OBJS = $(notdir $(SRCS:.cpp=.o))
-
 $(info Source file: $(SRCS))
-$(info Object file: $(OBJS))
 
 MANDATORY_FLAG = -Wall -Wcast-qual -fno-exceptions -std=c++17 -pedantic -Wextra -Wshadow -Wmissing-declarations
 OPTI_FLAG = -O3
 DEBUG_FLAG = -DDEBUG
 
+COMMIT_HASH = $(shell git log -1 --pretty=format:'%h' -n 1)
+COMMIT_NAME = $(shell git log -1 --pretty=%B | sed 's/ /_/g')
+COMMIT_CHANGE = $(shell git diff-index --quiet HEAD)
+
+ifeq ($(COMMIT_CHANGE),)
+	COMMIT_CHANGE =  
+else
+	COMMIT_CHANGE = CHANGED_
+endif
+
+
+$(info COMMIT_HASH: $(COMMIT_HASH))
+$(info COMMIT_NAME: $(COMMIT_NAME))
+$(info COMMIT_CHANGE: $(COMMIT_CHANGE))
+
+RELEASE_NAME = tce_$(COMMIT_NAME)_$(COMMIT_CHANGE)$(COMMIT_HASH).exe
+$(info RELEASE_NAME: $(RELEASE_NAME))
+
 release:
-	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o tce.exe
+	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o $(RELEASE_NAME)
 debug:
 	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(DEBUG_FLAG) $(SRCS) -o tce_d.exe
 profile:
 	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(DEBUG_FLAG) $(SRCS) -g -o tce_profile.exe
-
