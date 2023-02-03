@@ -90,9 +90,8 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   }
 
   Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
-
-  int moves_searched = 0;
   Move current_move;
+
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     Position next_pos = Position(pos);
 
@@ -279,9 +278,9 @@ void search_position(Position* pos, int depth) {
   // init alpha beta
   int alpha = -infinity, beta = infinity;
 
-  int starttime = get_time_ms();
+  int top_time = get_time_ms();
   reset_stop_flag();
-  Move bestmove;
+  Move bestmove = UNDEFINED_MOVE;
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= depth; current_depth++) {
@@ -313,13 +312,13 @@ void search_position(Position* pos, int depth) {
     // beta = score + 50;
     
     if (score > -mate_value && score < -mate_score) {
-      printf("info score mate %d depth %d nodes %ld time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - starttime);
+      printf("info score mate %d depth %d nodes %ld time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
     }
     else if (score > mate_score && score < mate_value) {
-      printf("info score mate %d depth %d nodes %ld time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - starttime); 
+      printf("info score mate %d depth %d nodes %ld time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - top_time); 
     }  
     else
-      printf("info score cp %d depth %d nodes %ld time %d pv ", score, current_depth, nodes, get_time_ms() - starttime);
+      printf("info score cp %d depth %d nodes %ld time %d pv ", score, current_depth, nodes, get_time_ms() - top_time);
     
 
     for (int count = 0; count < sd.pv_length[0]; count++) {

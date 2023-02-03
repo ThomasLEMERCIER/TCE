@@ -14,6 +14,8 @@
 #include "search.hpp"
 #include "uci.hpp"
 
+void init_all();
+
 void init_all() {
   init_evaluation_masks();
   init_attacks();

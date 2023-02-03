@@ -166,6 +166,9 @@ int evaluate(Position* pos) {
 
           score -= count_bits(get_king_attacks(square) & pos->occupancies[Color::black]) * king_shield_bonus;
           break;
+
+        default:
+          break;
       }
 
       // pop ls1b
