@@ -13,31 +13,12 @@ void clear_search_data() {
   memset(&sd, 0, sizeof(SearchData));
 }
 
-int TranspositionTable::probe(Position* pos, int alpha, int beta, int depth, Move& move) {
-  TTEntry *hash_entry = &table[pos->hash_key % hash_size];
+int TranspositionTable::probe(Position* pos, TTEntry& tte) {
+  tte = table[pos->hash_key % hash_size];
 
-  if (hash_entry->key == pos->hash_key) {
-    if (hash_entry->depth >= depth) {
-      if (hash_entry->flag == hash_flag_exact) {
-        int score = hash_entry->score;
-
-        if (score < - mate_score) score += pos->ply;
-        if (score > mate_score) score -= pos->ply;
-        move = hash_entry->best_move;
-        return score;
-      }
-      if ((hash_entry->flag == hash_flag_alpha) &&  hash_entry->score <= alpha) {
-        move = hash_entry->best_move;
-        return alpha;
-      }
-      if ((hash_entry->flag == hash_flag_beta) &&  hash_entry->score >= beta) {
-        move = hash_entry->best_move;
-        return beta;
-      }
-    }
-    move = hash_entry->best_move;
-  }
-  return no_hash_entry;
+  if (tte.key == pos->hash_key)
+    return 1;
+  return 0;
 }
 
 void TranspositionTable::write_entry(Position* pos, int flag, int score, int depth, Move move) {
@@ -73,11 +54,25 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   // increment nodes count
   nodes++;
 
+  TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
-  int score = TT.probe(pos, alpha, beta, 1, previous_best_move);
+  int score;
 
-  if (pos->ply && (score != no_hash_entry)) {
-    return score;
+  if (TT.probe(pos, tte)) {
+    if (tte.flag == ExactFlag) {
+      score = tte.score;
+
+      if (score < - mate_score) score += pos->ply;
+      if (score > mate_score) score -= pos->ply;
+      return score;
+    }
+    if ((tte.flag == UpperBound) &&  tte.score <= alpha) {
+      return alpha;
+    }
+    if ((tte.flag == LowerBound) &&  tte.score >= beta) {
+      return beta;
+    }
+    previous_best_move = tte.best_move;
   }
 
   int evaluation = evaluate(pos);
@@ -105,7 +100,7 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
       continue;
     }
   
-    int score = -quiescence(&next_pos, -beta, -alpha, nodes);
+    score = -quiescence(&next_pos, -beta, -alpha, nodes);
 
     if(get_stop_flag()) return 0;
     
@@ -129,13 +124,29 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
   if (repetition_detection(pos))
     return draw_value;
 
+  TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
   int pv_node = (beta - alpha) > 1;
-  int score = TT.probe(pos, alpha, beta, depth, previous_best_move);
-  // printf("Score tt: %d, best move: ", score); print_move(previous_best_move); printf("\n");
+  int original_alpha = alpha;
+  int score;
 
-  if (pos->ply && (score != no_hash_entry) && !pv_node) {
-    return score;
+  if (TT.probe(pos, tte)) {
+    if (pos->ply && tte.depth >= depth && !pv_node) {
+      if (tte.flag == ExactFlag) {
+        score = tte.score;
+
+        if (score < - mate_score) score += pos->ply;
+        if (score > mate_score) score -= pos->ply;
+        return score;
+      }
+      if ((tte.flag == UpperBound) &&  tte.score <= alpha) {
+        return alpha;
+      }
+      if ((tte.flag == LowerBound) &&  tte.score >= beta) {
+        return beta;
+      }
+    }
+    previous_best_move = tte.best_move;
   }
 
   sd.pv_length[pos->ply] = pos->ply;
@@ -158,24 +169,9 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
   nodes++;
   int legal_moves = 0;
 
-  // null move pruning
-  // if (null_pruning && (!pv_node && depth >= 3 && !in_check && pos->ply)) {
-  //   Position next_pos = Position(pos);
-  //   make_null_move(&next_pos);
-
-  //   // reduction factor
-  //   int r = 2;
-
-  //   // disable null pruning for next node
-  //   score = -negamax(&next_pos, -beta, - beta + 1, depth - r, 0, nodes);
-
-  //   if (score >= beta) {
-  //     return beta;
-  //   }
-  // }
-
   Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
-  Move best_move;
+  Move best_move = UNDEFINED_MOVE;
+  int best_score = -infinity;
 
   int moves_searched = 0;
   Move current_move;
@@ -218,39 +214,40 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
 
     moves_searched++;
 
-    // found a better move
-    if (score > alpha) {
-      TT.write_entry(pos, hash_flag_exact, score, depth, current_move);
+    if (score > best_score) {
 
-      // store history moves
-      if (!get_move_capture_f(current_move))
-        sd.history_moves[get_move_piece(current_move)][get_move_target(current_move)] += depth;
-
-      // PV node
-      alpha = score;
+      best_score = score;
       best_move = current_move;
 
-      // write PV move
-      sd.pv_table[pos->ply][pos->ply] = current_move;
-            
-      // loop over the next ply
-      for (int next_ply = pos->ply + 1; next_ply < sd.pv_length[pos->ply + 1]; next_ply++)
-        // copy move from deeper ply into a current ply's line
-        sd.pv_table[pos->ply][next_ply] = sd.pv_table[pos->ply + 1][next_ply];
-      
-      // adjust PV length
-      sd.pv_length[pos->ply] = sd.pv_length[pos->ply + 1];
+      if (score > alpha) {
+        
+        // store history moves
+        if (!get_move_capture_f(current_move))
+          sd.history_moves[get_move_piece(current_move)][get_move_target(current_move)] += depth;
 
-      // fail-hard beta cutoff
-      if (score >= beta) {
-        TT.write_entry(pos, hash_flag_beta, score, depth, current_move);
+        alpha = score;
 
-        // store killer moves
-        if (!get_move_capture_f(current_move)) {
-          sd.killer_moves[1][pos->ply] = sd.killer_moves[0][pos->ply];
-          sd.killer_moves[0][pos->ply] = current_move;
+        // write PV move
+        sd.pv_table[pos->ply][pos->ply] = current_move;
+              
+        // loop over the next ply
+        for (int next_ply = pos->ply + 1; next_ply < sd.pv_length[pos->ply + 1]; next_ply++)
+          // copy move from deeper ply into a current ply's line
+          sd.pv_table[pos->ply][next_ply] = sd.pv_table[pos->ply + 1][next_ply];
+        
+        // adjust PV length
+        sd.pv_length[pos->ply] = sd.pv_length[pos->ply + 1];
+
+        // fail-hard beta cutoff
+        if (score >= beta) {
+
+          // store killer moves
+          if (!get_move_capture_f(current_move)) {
+            sd.killer_moves[1][pos->ply] = sd.killer_moves[0][pos->ply];
+            sd.killer_moves[0][pos->ply] = current_move;
+          }
+          break;
         }
-        return beta;
       }
     }
   }
@@ -262,8 +259,12 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
     else
       return 0;
   }
-  TT.write_entry(pos, hash_flag_alpha, score, depth, best_move);
-  return alpha;
+
+  int tt_flag = (best_score >= beta) ? LowerBound : (alpha > original_alpha) ? ExactFlag : UpperBound;
+  int return_score = (best_score >= beta) ? beta : (alpha > original_alpha) ? best_score  : alpha;
+
+  TT.write_entry(pos, tt_flag, return_score, depth, best_move);
+  return return_score;
 }
 
 void search_position(Position* pos, int depth) {
@@ -289,8 +290,6 @@ void search_position(Position* pos, int depth) {
 			// stop calculating and return best move so far 
 			break;
 
-    printf("Current depth: %d\n", current_depth);
-
     // find best move
     score = negamax(pos, alpha, beta, current_depth, 0, nodes);
 
@@ -299,7 +298,7 @@ void search_position(Position* pos, int depth) {
       alpha = -infinity;
       beta = infinity;
 
-      printf("windows fail rerun at full length\n");
+      // printf("windows fail rerun at full length\n");
       score = negamax(pos, alpha, beta, current_depth, 0, nodes);
     }
 

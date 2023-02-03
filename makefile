@@ -8,22 +8,15 @@ DEBUG_FLAG = -DDEBUG
 
 COMMIT_HASH = $(shell git log -1 --pretty=format:'%h' -n 1)
 COMMIT_NAME = $(shell git log -1 --pretty=%B | sed 's/ /_/g')
-COMMIT_CHANGE = $(shell git diff-index --quiet HEAD)
-
-ifeq ($(COMMIT_CHANGE),)
-	COMMIT_CHANGE =  
-else
-	COMMIT_CHANGE = CHANGED_
-endif
-
 
 $(info COMMIT_HASH: $(COMMIT_HASH))
 $(info COMMIT_NAME: $(COMMIT_NAME))
-$(info COMMIT_CHANGE: $(COMMIT_CHANGE))
 
-RELEASE_NAME = tce_$(COMMIT_NAME)_$(COMMIT_CHANGE)$(COMMIT_HASH).exe
+RELEASE_NAME = tce_$(COMMIT_NAME)_$(COMMIT_HASH).exe
 $(info RELEASE_NAME: $(RELEASE_NAME))
 
+working:
+	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o tce.exe
 release:
 	g++ $(MANDATORY_FLAG) $(OPTI_FLAG) $(SRCS) -o $(RELEASE_NAME)
 debug:

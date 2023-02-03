@@ -198,7 +198,7 @@ void parse_position(Position* pos, char *command) {
     }
   }
 
-  printf("position set\n");
+  // printf("position set\n");
 }
 
 void parse_go(Position* pos, char *command)
