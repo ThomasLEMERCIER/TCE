@@ -45,11 +45,8 @@ struct SearchData {
 };
 
 #define hash_size 800000
-#define no_hash_entry 100000
 
-#define hash_flag_exact  0
-#define hash_flag_alpha  1
-#define hash_flag_beta   2
+enum TTFlag : int { ExactFlag, UpperBound, LowerBound };
 
 struct TTEntry {
   U64 key;          // hash key of position
@@ -64,7 +61,7 @@ public:
   TTEntry table[hash_size];
 
 
-  int probe(Position* pos, int alpha, int beta, int depth, Move& move);
+  int probe(Position* pos, TTEntry& tte);
   void write_entry(Position* pos, int flag, int score, int depth, Move move);
   void clear();
 };
