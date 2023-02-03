@@ -295,6 +295,8 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
           set_bit(pos->occupancies[Color::both], Square::d8);
           pop_bit(pos->occupancies[Color::both], Square::a8);
           break;
+        default:
+          break;
         }
     }
 

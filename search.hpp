@@ -77,6 +77,8 @@ int lmr_condition(Move move, int moves_searched, int in_check, int depth);
 
 void search_position(Position* pos, int depth);
 void reset_TT();
+void clear_search_data();
+int repetition_detection(Position* pos);
 
 constexpr int full_depth_moves = 4;
 constexpr int reduction_limit = 3;
