@@ -139,7 +139,7 @@ constexpr int castling_rights[64] = {
   13, 15, 15, 15, 12, 15, 15, 14
 };
 
-constexpr char* square_to_coordinates[] = 
+constexpr char const * square_to_coordinates[] = 
 {
   "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
   "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
@@ -182,16 +182,16 @@ const std::unordered_map<int, char> promoted_pieces = {
 };
 
 // FEN dedug positions
-constexpr char* empty_board  = "8/8/8/8/8/8/8/8 w - - ";
-constexpr char* start_position  = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
-constexpr char* tricky_position = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ";
-constexpr char* killer_position  = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
-constexpr char* cmk_position = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
+constexpr char const * empty_board  = "8/8/8/8/8/8/8/8 w - - ";
+constexpr char const * start_position  = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
+constexpr char const * tricky_position = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ";
+constexpr char const * killer_position  = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
+constexpr char const * cmk_position = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
 
 
-constexpr char* perft_3 = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
-constexpr char* perft_4 = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
-constexpr char* perft_5 = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";
-constexpr char* perft_6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ";
+constexpr char const * perft_3 = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
+constexpr char const * perft_4 = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+constexpr char const * perft_5 = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";
+constexpr char const * perft_6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ";
 
 #endif

@@ -22,8 +22,8 @@ public:
 
   Position* pos;
 
+  KillerMoves* killer_moves;
   HistoryMoves* history_moves;
-  KillerMoves* killer_moves;  
   Move previous_best_move;
 };
 
