@@ -5,6 +5,8 @@
 #include "movegen.hpp"
 #include "move.hpp"
 #include "search.hpp"
+#include "bench.hpp"
+
 // exit from engine flag
 extern int quit;
 
