@@ -283,9 +283,10 @@ void parse_go(Position* pos, char *command)
   // print debug info
   printf("time:%d start:%d stop:%d depth:%d timeset:%d\n",
   time_holder, starttime, stoptime, depth, timeset);
+  unsigned long long nodes = 0;
 
   // search position
-  search_position(pos, depth);
+  search_position(pos, depth, nodes);
 }
 
 int get_stop_flag() {
@@ -350,6 +351,10 @@ void uci_loop() {
       printf("id name TCE\n");
       printf("id name TCE\n");
       printf("uciok\n");
+    }
+
+    else if (strncmp(input, "bench", 5) == 0) {
+      bench();
     }
   }
 }
