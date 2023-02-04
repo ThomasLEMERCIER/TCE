@@ -297,7 +297,12 @@ void reset_stop_flag() {
   stopped = 0;
 }
 
-void uci_loop() {
+void uci_loop(int argc, char* argv[]) {
+
+  if (argc > 1 && (strncmp(argv[1], "bench", 5) == 0)) {
+    bench(); return;
+  }
+
   // reset STDIN & STDOUT buffers
   setbuf(stdin, NULL);
   setbuf(stdout, NULL);
