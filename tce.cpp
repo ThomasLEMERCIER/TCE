@@ -22,7 +22,7 @@ void init_all() {
   init_random_keys();
 }
 
-int main() {
+int main(int argc, char **argv) {
   // init all
   init_all();
   
@@ -60,7 +60,7 @@ int main() {
 
   }
   else
-    uci_loop();
+    uci_loop(argc, argv);
   
   return 0;
 }

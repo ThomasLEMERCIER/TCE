@@ -40,7 +40,7 @@ void communicate();
 int parse_move(Position* pos, char *move_string);
 void parse_position(Position* pos, char *command);
 void parse_go(Position* pos, char *command);
-void uci_loop();
+void uci_loop(int argc, char* argv[]);
 int get_stop_flag();
 void reset_stop_flag();
 
