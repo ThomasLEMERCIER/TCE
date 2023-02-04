@@ -45,7 +45,7 @@ int repetition_detection(Position* pos) {
   return 0;
 }
 
-int quiescence(Position* pos, int alpha, int beta, long& nodes) {
+int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
   // every 2047 nodes
   if((nodes & 2047 ) == 0)
     // "listen" to the GUI/user input
@@ -114,7 +114,7 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   return alpha;
 }
 
-int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, long& nodes) {
+int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, unsigned long long& nodes) {
   // every 2047 nodes
   if((nodes & 2047 ) == 0)
     // "listen" to the GUI/user input
@@ -266,13 +266,11 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
   return return_score;
 }
 
-void search_position(Position* pos, int depth) {
+void search_position(Position* pos, int depth, unsigned long long& nodes) {
 
   pos->ply = 0;
 
   int score = 0;
-  long nodes = 0;
-
   clear_search_data();
 
   // init alpha beta
@@ -312,13 +310,13 @@ void search_position(Position* pos, int depth) {
     // beta = score + 50;
     
     if (score > -mate_value && score < -mate_score) {
-      printf("info score mate %d depth %d nodes %ld time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
+      printf("info score mate %d depth %d nodes %llu time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
     }
     else if (score > mate_score && score < mate_value) {
-      printf("info score mate %d depth %d nodes %ld time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - top_time); 
+      printf("info score mate %d depth %d nodes %llu time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - top_time); 
     }  
     else
-      printf("info score cp %d depth %d nodes %ld time %d pv ", score, current_depth, nodes, get_time_ms() - top_time);
+      printf("info score cp %d depth %d nodes %llu time %d pv ", score, current_depth, nodes, get_time_ms() - top_time);
     
 
     for (int count = 0; count < sd.pv_length[0]; count++) {
