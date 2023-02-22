@@ -168,7 +168,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
   nodes++;
 
   // null move pruning
-  if (null_pruning && pos->ply && depth >= 3 && !pv_node && !in_check) {
+  if (null_pruning && pos->ply && depth > 3 && !pv_node && !in_check) {
     Position next_pos = Position(pos);
     make_null_move(&next_pos);
 
