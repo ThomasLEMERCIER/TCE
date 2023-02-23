@@ -172,7 +172,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
     Position next_pos = Position(pos);
     make_null_move(&next_pos);
 
-    score = negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, nodes);
+    score = -negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, nodes);
 
     if (score >= beta) {
       return beta;
