@@ -16,5 +16,5 @@ void bench() {
   }
   int elapsed = get_time_ms() - top_time;
   printf("\n===========================\nTotal time (ms) : %d, \nNodes searched  : %llu, \nNodes/second    : %f\n", elapsed, nodes, 1000 * (double)((double)nodes / (double)elapsed));
-  printf("%llu nodes %d nps", nodes, 1000 * nodes / elapsed);
+  printf("%llu nodes %llu nps", nodes, 1000 * nodes / elapsed);
 }
