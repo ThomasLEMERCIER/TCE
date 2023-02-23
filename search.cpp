@@ -45,7 +45,7 @@ int repetition_detection(Position* pos) {
   return 0;
 }
 
-int quiescence(Position* pos, int alpha, int beta, long& nodes) {
+int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
   // every 2047 nodes
   if((nodes & 2047 ) == 0)
     // "listen" to the GUI/user input
@@ -114,7 +114,7 @@ int quiescence(Position* pos, int alpha, int beta, long& nodes) {
   return alpha;
 }
 
-int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, long& nodes) {
+int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, unsigned long long& nodes) {
   // every 2047 nodes
   if((nodes & 2047 ) == 0)
     // "listen" to the GUI/user input
@@ -166,11 +166,24 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
 
   // increment nodes count
   nodes++;
-  int legal_moves = 0;
+
+  // null move pruning
+  if (null_pruning && pos->ply && depth > 3 && !pv_node && !in_check) {
+    Position next_pos = Position(pos);
+    make_null_move(&next_pos);
+
+    score = -negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, nodes);
+
+    if (score >= beta) {
+      return beta;
+    }
+
+  }
 
   Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
   Move best_move = UNDEFINED_MOVE;
   int best_score = -infinity;
+  int legal_moves = 0;
 
   int moves_searched = 0;
   Move current_move;
@@ -182,8 +195,6 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
       continue;
     }
     legal_moves++;
-
-    // score = - negamax(next_pos, -beta, -alpha, depth-1, 0, nodes);
 
     // full depth search
     if (moves_searched == 0)
@@ -266,13 +277,11 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, lon
   return return_score;
 }
 
-void search_position(Position* pos, int depth) {
+void search_position(Position* pos, int depth, unsigned long long& nodes) {
 
   pos->ply = 0;
 
   int score = 0;
-  long nodes = 0;
-
   clear_search_data();
 
   // init alpha beta
@@ -312,13 +321,13 @@ void search_position(Position* pos, int depth) {
     // beta = score + 50;
     
     if (score > -mate_value && score < -mate_score) {
-      printf("info score mate %d depth %d nodes %ld time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
+      printf("info score mate %d depth %d nodes %llu time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
     }
     else if (score > mate_score && score < mate_value) {
-      printf("info score mate %d depth %d nodes %ld time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - top_time); 
+      printf("info score mate %d depth %d nodes %llu time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - top_time); 
     }  
     else
-      printf("info score cp %d depth %d nodes %ld time %d pv ", score, current_depth, nodes, get_time_ms() - top_time);
+      printf("info score cp %d depth %d nodes %llu time %d pv ", score, current_depth, nodes, get_time_ms() - top_time);
     
 
     for (int count = 0; count < sd.pv_length[0]; count++) {
