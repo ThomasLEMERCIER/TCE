@@ -199,7 +199,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
     // full depth search
     if (moves_searched == 0)
       // do normal alpha beta search
-      score = -negamax(&next_pos, -beta, -alpha, depth - 1, 0, nodes);
+      score = -negamax(&next_pos, -beta, -alpha, depth - 1, 1, nodes);
     // late move reduction (LMR)
     else
     {
@@ -215,10 +215,10 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
       // PVS
       if(score > alpha)
       {
-        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, 0, nodes);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, 1, nodes);
     
         if((score > alpha) && (score < beta))
-          score = -negamax(&next_pos, -beta, -alpha, depth-1, 0, nodes);
+          score = -negamax(&next_pos, -beta, -alpha, depth-1, 1, nodes);
       }
     }
 
