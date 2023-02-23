@@ -166,11 +166,24 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
 
   // increment nodes count
   nodes++;
-  int legal_moves = 0;
+
+  // null move pruning
+  if (null_pruning && pos->ply && depth > 3 && !pv_node && !in_check) {
+    Position next_pos = Position(pos);
+    make_null_move(&next_pos);
+
+    score = -negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, nodes);
+
+    if (score >= beta) {
+      return beta;
+    }
+
+  }
 
   Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
   Move best_move = UNDEFINED_MOVE;
   int best_score = -infinity;
+  int legal_moves = 0;
 
   int moves_searched = 0;
   Move current_move;
@@ -182,8 +195,6 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
       continue;
     }
     legal_moves++;
-
-    // score = - negamax(next_pos, -beta, -alpha, depth-1, 0, nodes);
 
     // full depth search
     if (moves_searched == 0)

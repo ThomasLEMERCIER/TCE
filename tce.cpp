@@ -38,8 +38,13 @@ int main(int argc, char **argv) {
 
     Position pos[1];
 
-    pos->set(start_position);
-    perft_test(pos, 6);
+    pos->set(killer_position);
+    print_board(pos);
+
+    make_null_move(pos);
+    print_board(pos);
+
+    // perft_test(pos, 6);
 
     // pos->set(tricky_position);
     // perft_test(pos, 5);
