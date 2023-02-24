@@ -280,45 +280,24 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
 void search_position(Position* pos, int depth, unsigned long long& nodes) {
 
   pos->ply = 0;
-
-  int score = 0;
   clear_search_data();
-
-  // init alpha beta
-  int alpha = -infinity, beta = infinity;
 
   int top_time = get_time_ms();
   reset_stop_flag();
+
   Move bestmove = UNDEFINED_MOVE;
+  int score = 0;
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= depth; current_depth++) {
-    // if time is up
-    if(get_stop_flag())
-			// stop calculating and return best move so far 
-			break;
 
-    // find best move
-    score = negamax(pos, alpha, beta, current_depth, 0, nodes);
-
-    // window fail go for full window
-    if ((score <= alpha) || (score >= beta)) {
-      alpha = -infinity;
-      beta = infinity;
-
-      // printf("windows fail rerun at full length\n");
-      score = negamax(pos, alpha, beta, current_depth, 0, nodes);
-    }
+    score = aspiration_window_search(pos, score, current_depth, nodes);
 
     if(get_stop_flag())
 			// stop calculating and return best move so far 
 			break;
 
     bestmove = sd.pv_table[0][0];
-
-    // aspiration window
-    // alpha = score - 50;
-    // beta = score + 50;
     
     if (score > -mate_value && score < -mate_score) {
       printf("info score mate %d depth %d nodes %llu time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
@@ -344,6 +323,44 @@ void search_position(Position* pos, int depth, unsigned long long& nodes) {
   print_move(bestmove);
   printf("\n");
 
+}
+
+int aspiration_window_search(Position* pos, int previous_score, int current_depth, unsigned long long& nodes) {
+
+  int score = 0;
+
+  int alpha = -infinity, beta = infinity;
+  int delta = 12;
+
+  // only use a smaller window at higher depth
+  if (current_depth >= 3) {
+    alpha = std::max(-infinity, previous_score - delta);
+    beta = std::min(previous_score + delta, infinity);
+  }
+
+  while (true) {
+
+    score = negamax(pos, alpha, beta, current_depth, 0, nodes);
+
+    if(get_stop_flag())
+			// stop calculating and return best move so far 
+			break;
+
+    // outside of the score window, we have to rerun the search with a wider window
+    if (score <= alpha) {
+      alpha = std::max(-infinity, score - delta);
+    }
+    else if (score >= beta) {
+      beta = std::min(previous_score + delta, infinity);
+    }
+    else
+      break;
+    
+    delta *= 2;
+    
+
+  }
+  return score;
 }
 
 int lmr_condition(Move move, int moves_searched, int in_check, int depth) {

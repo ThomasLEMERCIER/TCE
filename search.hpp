@@ -71,11 +71,12 @@ extern SearchData sd;
 
 int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes);
 int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, unsigned long long& nodes);
+int aspiration_window_search(Position* pos, int previous_score, int current_depth, unsigned long long& nodes);
+void search_position(Position* pos, int depth, unsigned long long& nodes);
 
 
 int lmr_condition(Move move, int moves_searched, int in_check, int depth);
 
-void search_position(Position* pos, int depth, unsigned long long& nodes);
 void reset_TT();
 void clear_search_data();
 int repetition_detection(Position* pos);
