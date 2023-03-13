@@ -15,10 +15,10 @@ void Orderer::score_moves() {
       moveExt->score = BEST_SCORE_SORT;
     }
     else if (get_move_capture_f(moveExt->move)) {
-      Piece target_piece = Piece::P;
+      Piece target_piece = Piece::WP;
 
-      Piece start_piece = (pos->side == Color::white) ? Piece::p : Piece::P;
-      Piece end_piece = (pos->side == Color::white) ? Piece::k : Piece::K;
+      Piece start_piece = (pos->side == Color::WHITE) ? Piece::BP : Piece::WP;
+      Piece end_piece = (pos->side == Color::WHITE) ? Piece::BK : Piece::WK;
 
       for (Piece piece = start_piece; piece <= end_piece; ++piece) {
         if (get_bit(pos->bitboards[piece], get_move_target(moveExt->move))) {

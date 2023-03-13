@@ -6,20 +6,20 @@ void generate_moves(Position* pos, MoveList* move_list) {
   move_list->move_count = 0;
 
   generate_castle_moves(pos, move_list);
-  if (pos->side == Color::white) {
-    generate_pawn_moves<Color::white>(pos, move_list);
-    generate_piece_moves<Piece::N>(pos, move_list);
-    generate_piece_moves<Piece::B>(pos, move_list);
-    generate_piece_moves<Piece::R>(pos, move_list);
-    generate_piece_moves<Piece::Q>(pos, move_list);
-    generate_piece_moves<Piece::K>(pos, move_list);
+  if (pos->side == Color::WHITE) {
+    generate_pawn_moves<Color::WHITE>(pos, move_list);
+    generate_piece_moves<Piece::WN>(pos, move_list);
+    generate_piece_moves<Piece::WB>(pos, move_list);
+    generate_piece_moves<Piece::WR>(pos, move_list);
+    generate_piece_moves<Piece::WQ>(pos, move_list);
+    generate_piece_moves<Piece::WK>(pos, move_list);
   } else {
-    generate_pawn_moves<Color::black>(pos, move_list);
-    generate_piece_moves<Piece::n>(pos, move_list);
-    generate_piece_moves<Piece::b>(pos, move_list);
-    generate_piece_moves<Piece::r>(pos, move_list);
-    generate_piece_moves<Piece::q>(pos, move_list);
-    generate_piece_moves<Piece::k>(pos, move_list);
+    generate_pawn_moves<Color::BLACK>(pos, move_list);
+    generate_piece_moves<Piece::BN>(pos, move_list);
+    generate_piece_moves<Piece::BB>(pos, move_list);
+    generate_piece_moves<Piece::BR>(pos, move_list);
+    generate_piece_moves<Piece::BQ>(pos, move_list);
+    generate_piece_moves<Piece::BK>(pos, move_list);
   }
 }
 
@@ -31,13 +31,13 @@ void generate_piece_moves(Position* pos, MoveList* move_list) {
 
   while (bb) {
     source_square = get_lsb_index(bb);
-    attacks = get_attacks_bb<piece>(source_square, pos->occupancies[Color::both]) & ((pos->side == Color::white) ? ~pos->occupancies[Color::white] : ~pos->occupancies[Color::black]);
+    attacks = get_attacks_bb<piece>(source_square, pos->occupancies[Color::BOTH]) & ((pos->side == Color::WHITE) ? ~pos->occupancies[Color::WHITE] : ~pos->occupancies[Color::BLACK]);
 
     while (attacks)
     {
       target_square = get_lsb_index(attacks);
 
-      if (!get_bit((pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white], target_square))
+      if (!get_bit((pos->side == Color::WHITE) ? pos->occupancies[Color::BLACK] : pos->occupancies[Color::WHITE], target_square))
         move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 0, 0, 0, 0));
       else
         move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));
@@ -50,18 +50,18 @@ void generate_piece_moves(Position* pos, MoveList* move_list) {
 
 template <Color c>
 void generate_pawn_moves(Position* pos, MoveList* move_list) {
-  constexpr Piece piece = (c == Color::white) ? Piece::P : Piece::p;
-  constexpr Direction forward  = (c == Color::white) ? Direction::UP : Direction::DOWN;
-  constexpr Direction backward  = (c == Color::white) ? Direction::DOWN : Direction::UP;
-  constexpr Bitboard RelativeRank7 = (c == Color::white) ? RANK_7_BB : RANK_2_BB;
-  constexpr Bitboard RelativeRank3 = (c == Color::white) ? RANK_3_BB : RANK_6_BB;
+  constexpr Piece piece = (c == Color::WHITE) ? Piece::WP : Piece::BP;
+  constexpr Direction forward  = (c == Color::WHITE) ? Direction::UP : Direction::DOWN;
+  constexpr Direction backward  = (c == Color::WHITE) ? Direction::DOWN : Direction::UP;
+  constexpr Bitboard RelativeRank7 = (c == Color::WHITE) ? RANK_7_BB : RANK_2_BB;
+  constexpr Bitboard RelativeRank3 = (c == Color::WHITE) ? RANK_3_BB : RANK_6_BB;
 
   Bitboard pawns = pos->bitboards[piece];
   Bitboard pawnsOn7 = pawns & RelativeRank7;
   Bitboard pawnsNotOn7 = pawns & ~RelativeRank7;
 
-  Bitboard emptySquares = ~pos->occupancies[Color::both];
-  Bitboard enemies = (pos->side == Color::white) ? pos->occupancies[Color::black] : pos->occupancies[Color::white];
+  Bitboard emptySquares = ~pos->occupancies[Color::BOTH];
+  Bitboard enemies = (pos->side == Color::WHITE) ? pos->occupancies[Color::BLACK] : pos->occupancies[Color::WHITE];
 
   Square source_square, target_square;
 
@@ -93,7 +93,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
     while (b1) {
       target_square = get_lsb_index(b1);
       source_square = shift<LEFT>(shift<backward>(target_square));
-      for (auto piece_prom : (pos->side == Color::white) ? WhitePromPiece : BlackPromPiece)
+      for (auto piece_prom : (pos->side == Color::WHITE) ? WhitePromPiece : BlackPromPiece)
         move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 1, 0, 0, 0));            
       pop_bit(b1, target_square);
     }
@@ -101,7 +101,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
     while (b2) {
       target_square = get_lsb_index(b2);
       source_square = shift<RIGHT>(shift<backward>(target_square));
-      for (auto piece_prom : (pos->side == Color::white) ? WhitePromPiece : BlackPromPiece)
+      for (auto piece_prom : (pos->side == Color::WHITE) ? WhitePromPiece : BlackPromPiece)
         move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 1, 0, 0, 0));            
       pop_bit(b2, target_square);
     }
@@ -109,7 +109,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
     while (b3) {
       target_square = get_lsb_index(b3);
       source_square = shift<backward>(target_square);
-      for (auto piece_prom : (pos->side == Color::white) ? WhitePromPiece : BlackPromPiece)
+      for (auto piece_prom : (pos->side == Color::WHITE) ? WhitePromPiece : BlackPromPiece)
         move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 0, 0, 0, 0));            
       pop_bit(b3, target_square);
     }
@@ -135,7 +135,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
     pop_bit(b2, target_square);
   }
 
-  if (pos->enpassant != Square::no_sq)
+  if (pos->enpassant != Square::NO_SQUARE)
   {
     b1 = pawnsNotOn7 & get_pawn_attacks(pos->enpassant, ~pos->side); // symetry of attacks
     while (b1)
@@ -148,38 +148,38 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
 }
 
 void generate_castle_moves(Position* pos, MoveList* move_list) {
-  if (pos->side == Color::white){
-    if (pos->castle_rights & Castle_Right::wk) {
-      if (!get_bit(pos->occupancies[Color::both], Square::f1) && 
-          !get_bit(pos->occupancies[Color::both], Square::g1) &&
-          !is_square_attacked(pos, Square::e1, Color::black)  &&
-          !is_square_attacked(pos, Square::f1, Color::black))
-            move_push(move_list, encode_move(Square::e1, Square::g1, Piece::K, (Piece)0, 0, 0, 0, 1));
+  if (pos->side == Color::WHITE){
+    if (pos->castle_rights & Castle_Right::WOO) {
+      if (!get_bit(pos->occupancies[Color::BOTH], Square::F1) && 
+          !get_bit(pos->occupancies[Color::BOTH], Square::G1) &&
+          !is_square_attacked(pos, Square::E1, Color::BLACK)  &&
+          !is_square_attacked(pos, Square::F1, Color::BLACK))
+            move_push(move_list, encode_move(Square::E1, Square::G1, Piece::WK, (Piece)0, 0, 0, 0, 1));
     }
-    if (pos->castle_rights & Castle_Right::wq) {
-      if (!get_bit(pos->occupancies[Color::both], Square::b1) && 
-          !get_bit(pos->occupancies[Color::both], Square::c1) &&
-          !get_bit(pos->occupancies[Color::both], Square::d1) &&
-          !is_square_attacked(pos, Square::d1, Color::black)  &&
-          !is_square_attacked(pos, Square::e1, Color::black))
-            move_push(move_list, encode_move(Square::e1, Square::c1, Piece::K, (Piece)0, 0, 0, 0, 1));
+    if (pos->castle_rights & Castle_Right::WOOO) {
+      if (!get_bit(pos->occupancies[Color::BOTH], Square::B1) && 
+          !get_bit(pos->occupancies[Color::BOTH], Square::C1) &&
+          !get_bit(pos->occupancies[Color::BOTH], Square::D1) &&
+          !is_square_attacked(pos, Square::D1, Color::BLACK)  &&
+          !is_square_attacked(pos, Square::E1, Color::BLACK))
+            move_push(move_list, encode_move(Square::E1, Square::C1, Piece::WK, (Piece)0, 0, 0, 0, 1));
     }
   }
   else {
-    if (pos->castle_rights & Castle_Right::bk) {
-      if (!get_bit(pos->occupancies[Color::both], Square::f8) && 
-          !get_bit(pos->occupancies[Color::both], Square::g8) &&
-          !is_square_attacked(pos, Square::e8, Color::white)  &&
-          !is_square_attacked(pos, Square::f8, Color::white))
-            move_push(move_list, encode_move(Square::e8, Square::g8, Piece::k, (Piece)0, 0, 0, 0, 1));
+    if (pos->castle_rights & Castle_Right::BOO) {
+      if (!get_bit(pos->occupancies[Color::BOTH], Square::F8) && 
+          !get_bit(pos->occupancies[Color::BOTH], Square::G8) &&
+          !is_square_attacked(pos, Square::E8, Color::WHITE)  &&
+          !is_square_attacked(pos, Square::F8, Color::WHITE))
+            move_push(move_list, encode_move(Square::E8, Square::G8, Piece::BK, (Piece)0, 0, 0, 0, 1));
     }
-    if (pos->castle_rights & Castle_Right::bq) {
-      if (!get_bit(pos->occupancies[Color::both], Square::b8) &&
-          !get_bit(pos->occupancies[Color::both], Square::c8) && 
-          !get_bit(pos->occupancies[Color::both], Square::d8) &&
-          !is_square_attacked(pos, Square::d8, Color::white)  &&
-          !is_square_attacked(pos, Square::e8, Color::white))
-            move_push(move_list, encode_move(Square::e8, Square::c8, Piece::k, (Piece)0, 0, 0, 0, 1));
+    if (pos->castle_rights & Castle_Right::BOOO) {
+      if (!get_bit(pos->occupancies[Color::BOTH], Square::B8) &&
+          !get_bit(pos->occupancies[Color::BOTH], Square::C8) && 
+          !get_bit(pos->occupancies[Color::BOTH], Square::D8) &&
+          !is_square_attacked(pos, Square::D8, Color::WHITE)  &&
+          !is_square_attacked(pos, Square::E8, Color::WHITE))
+            move_push(move_list, encode_move(Square::E8, Square::C8, Piece::BK, (Piece)0, 0, 0, 0, 1));
     }
   }
 }

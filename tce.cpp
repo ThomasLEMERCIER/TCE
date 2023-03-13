@@ -9,7 +9,7 @@
 #include "position.hpp"
 #include "bitboard.hpp"
 #include "move.hpp"
-#include "utils.hpp"
+#include "timeman.hpp"
 #include "perft.hpp"
 #include "search.hpp"
 #include "uci.hpp"
@@ -34,29 +34,24 @@ int main(int argc, char **argv) {
 
   if (debug) {
     printf("debug mode\n");
-    // uci_loop();
+    uci_loop(argc, argv);
 
     Position pos[1];
 
-    pos->set(killer_position);
-    print_board(pos);
+    pos->set(start_position);
+    perft_test(pos, 6);
 
-    make_null_move(pos);
-    print_board(pos);
+    pos->set(tricky_position);
+    perft_test(pos, 5);
 
-    // perft_test(pos, 6);
+    pos->set(perft_3);
+    perft_test(pos, 6);
 
-    // pos->set(tricky_position);
-    // perft_test(pos, 5);
+    pos->set(perft_4);
+    perft_test(pos, 5);
 
-    // pos->set(perft_3);
-    // perft_test(pos, 6);
-
-    // pos->set(perft_4);
-    // perft_test(pos, 5);
-
-    // pos->set(perft_5);
-    // perft_test(pos, 5);
+    pos->set(perft_5);
+    perft_test(pos, 5);
 
   }
   else

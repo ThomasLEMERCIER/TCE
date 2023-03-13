@@ -5,21 +5,27 @@
 
 #define UNDEFINED_MOVE 0
 
+constexpr int INF = 50000;
+constexpr int MATE_VALUE = 49000;
+constexpr int MATE_SCORE = 48000;
+constexpr int DRAW_VALUE = 0;
+constexpr int NO_VALUE = 0;
+
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY_GAME = 1000;
-constexpr int MAX_PLY = 64;
+constexpr int MAX_PLY_SEARCH = 64;
 
 typedef unsigned long long U64;
 typedef int Move;
-typedef int KillerMoves[2][MAX_PLY];
+typedef int KillerMoves[2][MAX_PLY_SEARCH];
 typedef int HistoryMoves[12][64];
+typedef unsigned long long NodeCounter;
 
 constexpr int PIECE_NB = 12;
 constexpr int OCCUPANCY_NB = 3;
 constexpr int COLOR_NB = 2;
 
-// sides to move (colors)
-enum Color: int { white, black, both };
+enum Color: int { WHITE, BLACK, BOTH };
 
 Color operator~(Color c);
 
@@ -32,32 +38,35 @@ enum Direction : int {
 
 Direction operator~(Direction d);
 
-// encode pieces
-enum Piece : int { P, N, B, R, Q, K, p, n, b, r, q, k, no_p };
+enum Piece : int { WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, NO_PIECE };
 
-constexpr Piece WhitePromPiece[] = {N, B, R, Q};
-constexpr Piece BlackPromPiece[] = {n, b, r, q};
+constexpr Piece WhitePromPiece[] = {Piece::WN, Piece::WB, Piece::WR, Piece::WQ};
+constexpr Piece BlackPromPiece[] = {Piece::BN, Piece::BB, Piece::BR, Piece::BQ};
 
-Piece& operator++(Piece& d);
-Piece& operator--(Piece& d);
-
+Piece& operator++(Piece& piece);
+Piece& operator--(Piece& piece);
 
 enum Square : int {
-  a8, b8, c8, d8, e8, f8, g8, h8,
-  a7, b7, c7, d7, e7, f7, g7, h7,
-  a6, b6, c6, d6, e6, f6, g6, h6,
-  a5, b5, c5, d5, e5, f5, g5, h5,
-  a4, b4, c4, d4, e4, f4, g4, h4,
-  a3, b3, c3, d3, e3, f3, g3, h3,
-  a2, b2, c2, d2, e2, f2, g2, h2,
-  a1, b1, c1, d1, e1, f1, g1, h1, no_sq,
+  A8, B8, C8, D8, E8, F8, G8, H8,
+  A7, B7, C7, D7, E7, F7, G7, H7,
+  A6, B6, C6, D6, E6, F6, G6, H6,
+  A5, B5, C5, D5, E5, F5, G5, H5,
+  A4, B4, C4, D4, E4, F4, G4, H4,
+  A3, B3, C3, D3, E3, F3, G3, H3,
+  A2, B2, C2, D2, E2, F2, G2, H2,
+  A1, B1, C1, D1, E1, F1, G1, H1, NO_SQUARE,
 
   SQUARE_NB=64,
-  FIRST_SQ=0
+  FIRST_SQUARE=0
 };
 
 Square& operator++(Square& s);
 Square& operator--(Square& s);
+Square operator+(Square s, int i);
+Square operator-(Square s, int i);
+Square& operator+=(Square& s, int i);
+Square& operator-=(Square& s, int i);
+
 
 enum File : int {
   FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H
@@ -125,7 +134,7 @@ enum Move_Type { all_moves, only_captures };
 
   
 */
-enum Castle_Right { wk = 1, wq = 2, bk = 4, bq = 8 };
+enum Castle_Right { WOO = 1, WOOO = 2, BOO = 4, BOOO = 8 };
 
 // castling rights update constants
 constexpr int castling_rights[64] = {
@@ -155,30 +164,30 @@ constexpr char const * square_to_coordinates[] =
 constexpr char ascii_pieces[12] = { 'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k' };
 
 const std::unordered_map<char, Piece> char_pieces {
-  {'P', Piece::P},
-  {'N', Piece::N},
-  {'B', Piece::B},
-  {'R', Piece::R},
-  {'Q', Piece::Q},
-  {'K', Piece::K},
-  {'p', Piece::p},
-  {'n', Piece::n},
-  {'b', Piece::b},
-  {'r', Piece::r},
-  {'q', Piece::q},
-  {'k', Piece::k},
+  {'P', Piece::WP},
+  {'N', Piece::WN},
+  {'B', Piece::WB},
+  {'R', Piece::WR},
+  {'Q', Piece::WQ},
+  {'K', Piece::WK},
+  {'p', Piece::BP},
+  {'n', Piece::BN},
+  {'b', Piece::BB},
+  {'r', Piece::BR},
+  {'q', Piece::BQ},
+  {'k', Piece::BK},
 };
 
 const std::unordered_map<int, char> promoted_pieces = {
-  {Q,  'q'},
-  {N,  'n'},
-  {R,  'r'},
-  {B,  'b'},
-  {q,  'q'},
-  {n,  'n'},
-  {r,  'r'},
-  {b,  'b'},
-  {P,  '\0'},
+  {Piece::WQ,  'q'},
+  {Piece::WN,  'n'},
+  {Piece::WR,  'r'},
+  {Piece::WB,  'b'},
+  {Piece::BQ,  'q'},
+  {Piece::BN,  'n'},
+  {Piece::BR,  'r'},
+  {Piece::BB,  'b'},
+  {Piece::WP,  '\0'},
 };
 
 // FEN dedug positions

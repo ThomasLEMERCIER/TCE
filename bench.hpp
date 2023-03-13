@@ -3,7 +3,8 @@
 
 #include "position.hpp"
 #include "search.hpp"
-#include "utils.hpp"
+#include "timeman.hpp"
+#include "definition.hpp"
 
 constexpr int BENCH_FEN_NB = 46;
 constexpr char const* bench_fens[BENCH_FEN_NB] = {

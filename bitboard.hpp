@@ -36,14 +36,14 @@ constexpr Bitboard NOT_AB_FILE_BB = ~(FILE_A_BB | FILE_B_BB);
 constexpr Bitboard NOT_GH_FILE_BB = ~(FILE_G_BB | FILE_H_BB);
 
 constexpr Bitboard SquareBB[SQUARE_NB] = {
-  (1ULL << a8), (1ULL << b8), (1ULL << c8), (1ULL << d8), (1ULL << e8), (1ULL << f8), (1ULL << g8), (1ULL << h8),
-  (1ULL << a7), (1ULL << b7), (1ULL << c7), (1ULL << d7), (1ULL << e7), (1ULL << f7), (1ULL << g7), (1ULL << h7),
-  (1ULL << a6), (1ULL << b6), (1ULL << c6), (1ULL << d6), (1ULL << e6), (1ULL << f6), (1ULL << g6), (1ULL << h6),
-  (1ULL << a5), (1ULL << b5), (1ULL << c5), (1ULL << d5), (1ULL << e5), (1ULL << f5), (1ULL << g5), (1ULL << h5),
-  (1ULL << a4), (1ULL << b4), (1ULL << c4), (1ULL << d4), (1ULL << e4), (1ULL << f4), (1ULL << g4), (1ULL << h4),
-  (1ULL << a3), (1ULL << b3), (1ULL << c3), (1ULL << d3), (1ULL << e3), (1ULL << f3), (1ULL << g3), (1ULL << h3),
-  (1ULL << a2), (1ULL << b2), (1ULL << c2), (1ULL << d2), (1ULL << e2), (1ULL << f2), (1ULL << g2), (1ULL << h2),
-  (1ULL << a1), (1ULL << b1), (1ULL << c1), (1ULL << d1), (1ULL << e1), (1ULL << f1), (1ULL << g1), (1ULL << h1),
+  (1ULL << A8), (1ULL << B8), (1ULL << C8), (1ULL << D8), (1ULL << E8), (1ULL << F8), (1ULL << G8), (1ULL << H8),
+  (1ULL << A7), (1ULL << B7), (1ULL << C7), (1ULL << D7), (1ULL << E7), (1ULL << F7), (1ULL << G7), (1ULL << H7),
+  (1ULL << A6), (1ULL << B6), (1ULL << C6), (1ULL << D6), (1ULL << E6), (1ULL << F6), (1ULL << G6), (1ULL << H6),
+  (1ULL << A5), (1ULL << B5), (1ULL << C5), (1ULL << D5), (1ULL << E5), (1ULL << F5), (1ULL << G5), (1ULL << H5),
+  (1ULL << A4), (1ULL << B4), (1ULL << C4), (1ULL << D4), (1ULL << E4), (1ULL << F4), (1ULL << G4), (1ULL << H4),
+  (1ULL << A3), (1ULL << B3), (1ULL << C3), (1ULL << D3), (1ULL << E3), (1ULL << F3), (1ULL << G3), (1ULL << H3),
+  (1ULL << A2), (1ULL << B2), (1ULL << C2), (1ULL << D2), (1ULL << E2), (1ULL << F2), (1ULL << G2), (1ULL << H2),
+  (1ULL << A1), (1ULL << B1), (1ULL << C1), (1ULL << D1), (1ULL << E1), (1ULL << F1), (1ULL << G1), (1ULL << H1),
 };
 
 extern Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
@@ -255,11 +255,11 @@ File get_file(Square square);
 
 template <Piece piece>
 Bitboard get_attacks_bb(Square square, Bitboard occupancy) {
-  return (piece == Piece::N) || (piece == Piece::n) ? get_knight_attacks(square)            :
-         (piece == Piece::B) || (piece == Piece::b) ? get_bishop_attacks(square, occupancy) :
-         (piece == Piece::R) || (piece == Piece::r) ? get_rook_attacks(square, occupancy)   :
-         (piece == Piece::Q) || (piece == Piece::q) ? get_queen_attacks(square, occupancy)  :
-         (piece == Piece::K) || (piece == Piece::k) ? get_king_attacks(square)              : 0ULL;
+  return (piece == Piece::WN) || (piece == Piece::BN) ? get_knight_attacks(square)            :
+         (piece == Piece::WB) || (piece == Piece::BB) ? get_bishop_attacks(square, occupancy) :
+         (piece == Piece::WR) || (piece == Piece::BR) ? get_rook_attacks(square, occupancy)   :
+         (piece == Piece::WQ) || (piece == Piece::BQ) ? get_queen_attacks(square, occupancy)  :
+         (piece == Piece::WK) || (piece == Piece::BK) ? get_king_attacks(square)              : 0ULL;
 }
 
 #endif

@@ -52,6 +52,6 @@ void perft_test(Position* pos, int depth) {
 
   printf("\n    Depth: %d", depth);
   printf("\n    Nodes: %ld", nodes);
-  printf("\n    Time: %ldms\n\n", get_time_ms() - start);
+  printf("\n    Time: %lldms\n\n", get_time_ms() - start);
 
 }

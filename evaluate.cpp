@@ -56,7 +56,7 @@ int evaluate(Position* pos) {
   Square square;
   int double_pawns = 0;
   
-  for (Piece piece = Piece::P; piece <= Piece::k; ++piece) {
+  for (Piece piece = Piece::WP; piece <= Piece::BK; ++piece) {
     bitboard = pos->bitboards[piece];
 
     while (bitboard)
@@ -67,7 +67,7 @@ int evaluate(Position* pos) {
 
       switch (piece)
       {
-        case P:
+        case Piece::WP:
           score += pawn_score[square];
 
           double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));
@@ -75,48 +75,48 @@ int evaluate(Position* pos) {
           if (double_pawns > 1)
             score += double_pawn_penalty;
 
-          if ((pos->bitboards[Piece::P] & isolated_masks[square]) == 0)
+          if ((pos->bitboards[Piece::WP] & isolated_masks[square]) == 0)
             score += isolated_pawn_penalty;
 
-          if ((white_passed_masks[square] & pos->bitboards[Piece::p]) == 0)
+          if ((white_passed_masks[square] & pos->bitboards[Piece::BP]) == 0)
             score += passed_pawn_bonus[get_rank(square)];
           
           break;
 
-        case N: score += knight_score[square]; break;
+        case Piece::WN: score += knight_score[square]; break;
 
-        case B:
+        case Piece::WB:
           score += bishop_score[square];
-          score += count_bits(get_bishop_attacks(square, pos->occupancies[Color::both]));   
+          score += count_bits(get_bishop_attacks(square, pos->occupancies[Color::BOTH]));   
           break;
 
-       case R:
+       case Piece::WR:
           score += rook_score[square];
 
-          if ((pos->bitboards[Piece::P] & get_file_bb(get_file(square))) == 0)
+          if ((pos->bitboards[Piece::WP] & get_file_bb(get_file(square))) == 0)
             score += semi_open_file_score;
 
-          if (((pos->bitboards[Piece::P] | pos->bitboards[Piece::p]) & get_file_bb(get_file(square))) == 0)
+          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
             score += open_file_score;
           break;
         
-        case Q:
-          score += count_bits(get_queen_attacks(square, pos->occupancies[Color::both]));
+        case Piece::WQ:
+          score += count_bits(get_queen_attacks(square, pos->occupancies[Color::BOTH]));
           break;
         
-        case K:
+        case Piece::WK:
           score += king_score[square];
 
-          if ((pos->bitboards[Piece::P] & get_file_bb(get_file(square))) == 0)
+          if ((pos->bitboards[Piece::WP] & get_file_bb(get_file(square))) == 0)
             score -= semi_open_file_score;
 
-          if (((pos->bitboards[Piece::P] | pos->bitboards[Piece::p]) & get_file_bb(get_file(square))) == 0)
+          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
             score -= open_file_score;
 
-          score += count_bits(get_king_attacks(square) & pos->occupancies[Color::white]) * king_shield_bonus;
+          score += count_bits(get_king_attacks(square) & pos->occupancies[Color::WHITE]) * king_shield_bonus;
           break;
 
-        case p:
+        case Piece::BP:
           score -= pawn_score[mirror_score[square]];
 
           double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));       
@@ -124,47 +124,47 @@ int evaluate(Position* pos) {
           if (double_pawns > 1)
             score -= double_pawn_penalty;
 
-          if ((pos->bitboards[Piece::p] & isolated_masks[square]) == 0)
+          if ((pos->bitboards[Piece::BP] & isolated_masks[square]) == 0)
             score -= isolated_pawn_penalty;
 
-          if ((black_passed_masks[square] & pos->bitboards[Piece::P]) == 0)
+          if ((black_passed_masks[square] & pos->bitboards[Piece::WP]) == 0)
             score -= passed_pawn_bonus[get_rank(mirror_score[square])];
 
           break;
 
-        case n: score -= knight_score[mirror_score[square]]; break;
+        case Piece::BN: score -= knight_score[mirror_score[square]]; break;
         
-        case b:
+        case Piece::BB:
           score -= bishop_score[mirror_score[square]];
 
-          score -= count_bits(get_bishop_attacks(square, pos->occupancies[Color::both]));
+          score -= count_bits(get_bishop_attacks(square, pos->occupancies[Color::BOTH]));
           break;
 
-        case r:
+        case Piece::BR:
           score -= rook_score[mirror_score[square]];
 
-          if ((pos->bitboards[Piece::p] & get_file_bb(get_file(square))) == 0)
+          if ((pos->bitboards[Piece::BP] & get_file_bb(get_file(square))) == 0)
             score -= semi_open_file_score;
 
-          if (((pos->bitboards[Piece::P] | pos->bitboards[Piece::p]) & get_file_bb(get_file(square))) == 0)
+          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
             score -= open_file_score;
           
           break;
         
-        case q:
-          score -= count_bits(get_queen_attacks(square, pos->occupancies[Color::both]));
+        case Piece::BQ:
+          score -= count_bits(get_queen_attacks(square, pos->occupancies[Color::BOTH]));
           break;
         
-        case k:
+        case Piece::BK:
           score -= king_score[mirror_score[square]];
 
-          if ((pos->bitboards[Piece::p] & get_file_bb(get_file(square))) == 0)
+          if ((pos->bitboards[Piece::BP] & get_file_bb(get_file(square))) == 0)
               score += semi_open_file_score;
 
-          if (((pos->bitboards[Piece::P] | pos->bitboards[Piece::p]) & get_file_bb(get_file(square))) == 0)
+          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
               score += open_file_score;
 
-          score -= count_bits(get_king_attacks(square) & pos->occupancies[Color::black]) * king_shield_bonus;
+          score -= count_bits(get_king_attacks(square) & pos->occupancies[Color::BLACK]) * king_shield_bonus;
           break;
 
         default:
@@ -176,5 +176,5 @@ int evaluate(Position* pos) {
     }
   }
   // return final evaluation based on side
-  return (pos->side == white) ? score : -score;
+  return (pos->side == WHITE) ? score : -score;
 }

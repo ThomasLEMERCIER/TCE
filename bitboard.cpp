@@ -17,7 +17,7 @@ U64 mask_pawn_attacks(Color side, Square square) {
   U64 bitboard = 0ULL;
   set_bit(bitboard, square);
 
-  if (side == Color::white) {
+  if (side == Color::WHITE) {
     if ((bitboard >> 7) & NOT_A_FILE_BB) attacks |= (bitboard >> 7);
     if ((bitboard >> 9) & NOT_H_FILE_BB) attacks |= (bitboard >> 9);
   }
@@ -66,9 +66,9 @@ Bitboard mask_king_attacks(Square square) {
 }
 
 void init_leapers_attacks() {
-  for (Square square = Square::FIRST_SQ; square < Square::SQUARE_NB; ++square) {
-    pawn_attacks[Color::white][square] = mask_pawn_attacks(white, square);
-    pawn_attacks[Color::black][square] = mask_pawn_attacks(black, square);
+  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square) {
+    pawn_attacks[Color::WHITE][square] = mask_pawn_attacks(WHITE, square);
+    pawn_attacks[Color::BLACK][square] = mask_pawn_attacks(BLACK, square);
 
     knight_attacks[square] = mask_knight_attacks(square);
 
@@ -77,7 +77,7 @@ void init_leapers_attacks() {
 }
 
 void init_slider_attacks(Sliding_Piece piece) {
-  for (Square square = Square::FIRST_SQ; square < Square::SQUARE_NB; ++square) {
+  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square) {
     Bitboard attack_mask;
     int relevant_bits_count;
 
@@ -273,12 +273,12 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
 
 void init_magic_numbers() {
   // loop over 64 board squares
-  for (Square square = Square::FIRST_SQ; square < Square::SQUARE_NB; ++square)
+  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square)
     // print rook magic numbers
     printf(" 0x%llxULL,\n", find_magic_number(square, rook_relevant_bits[square], rook));
 
   // loop over 64 board squares
-  for (Square square = Square::FIRST_SQ; square < Square::SQUARE_NB; ++square)
+  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square)
     // print bishop magic numbers
     printf(" 0x%llxULL,\n", find_magic_number(square, bishop_relevant_bits[square], bishop));
 }
@@ -356,7 +356,7 @@ void pop_bit(Bitboard& bitboard, Square square) {
 }
 
 Square get_lsb_index(Bitboard bitboard) {
-  assert(b);
+  assert(BB);
   return Square(__builtin_ctzll(bitboard));
 }
 

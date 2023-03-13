@@ -5,7 +5,7 @@
 
 class RNG {
 public:
-  RNG(unsigned int seed) : s(seed) { }
+  explicit RNG(unsigned int seed) : s(seed) { }
 
   unsigned int s;
 

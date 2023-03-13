@@ -1,7 +1,9 @@
 #ifndef POSITION_H_INCLUDED
 #define POSITION_H_INCLUDED
 
+#include <string>
 #include <string.h>
+
 
 #include "definition.hpp"
 #include "bitboard.hpp"
@@ -16,8 +18,7 @@ extern U64 castle_keys[64];
 class Position {
 public:
   Position() = default;
-  Position(Position* pos);
-
+  explicit Position(Position* pos);
 
   Bitboard bitboards[PIECE_NB];
   Bitboard occupancies[OCCUPANCY_NB];
@@ -32,7 +33,8 @@ public:
 
   int ply;
 
-  void set(const char* fenStr);
+  void set(const std::string& fenStr);
+  bool is_repetition();
 };
 
 int is_square_attacked(Position* pos, Square square, Color side);

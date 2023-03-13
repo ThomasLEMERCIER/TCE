@@ -1,58 +1,47 @@
 #include "search.hpp"
 
 #include <stdio.h>
+#include <thread>
 
-SearchData sd;
-TranspositionTable TT;
+std::thread search_thread;
+ThreadData search_td;
+std::atomic<bool> search_stopped;
 
-void TranspositionTable::clear() {
-  memset(this, 0, sizeof(TranspositionTable));
-}
-
-void clear_search_data() {
-  memset(&sd, 0, sizeof(SearchData));
-}
-
-int TranspositionTable::probe(Position* pos, TTEntry& tte) {
-  tte = table[pos->hash_key % hash_size];
-
-  if (tte.key == pos->hash_key)
-    return 1;
-  return 0;
-}
-
-void TranspositionTable::write_entry(Position* pos, int flag, int score, int depth, Move move) {
-  // always replace scheme
-  TTEntry *hash_entry = &table[pos->hash_key % hash_size];
-
-  // store mate score independently from distance to root node
-  if (score < - mate_score) score -= pos->ply;
-  if (score > mate_score) score += pos->ply;
-
-  hash_entry->key = pos->hash_key;
-  hash_entry->depth = depth;
-  hash_entry->flag = flag;
-  hash_entry->score = score;
-  hash_entry->best_move = move;
-}
-
-int repetition_detection(Position* pos) {
-  if (!pos->ply) return 0;
-  for (int index = 0; index < pos->repetition_index; index++) {
-    if (pos->repetition_table[index] == pos->hash_key)
-      return 1;
+inline void check_time(const SearchLimits& limits) {
+  if (search_stopped) return;
+  if (!limits.use_time_management()) return;
+  if (tm.is_time_up()) {
+    search_stopped = true;
   }
-  return 0;
+}
+  
+void start_search(const Position& pos, int depth, const SearchLimits& limits) {
+  
+  search_td.thread_id = 0;
+  search_td.depth = depth;
+  search_td.pos = pos;
+
+  search_td.nodes = 0;
+
+  memset(search_td.killer_moves, 0, sizeof(KillerMoves));
+  memset(search_td.history_moves, 0, sizeof(HistoryMoves));
+  memset(search_td.pv_length, 0, sizeof(search_td.pv_length));
+  memset(search_td.pv_table, 0, sizeof(search_td.pv_table));
+
+  search_td.limits = limits;
+
+  search_stopped = false;
+  search_thread = std::thread(search_position, std::ref(search_td));
 }
 
-int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
-  // every 2047 nodes
-  if((nodes & 2047 ) == 0)
-    // "listen" to the GUI/user input
-    communicate();
+void stop_search() {
+  search_stopped = true;
+  if (search_thread.joinable()) search_thread.join();
+}
 
-  // increment nodes count
-  nodes++;
+int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
+  if((td.thread_id == 0) && ((td.nodes & 2046 ) == 0))
+    check_time(td.limits);
 
   TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
@@ -62,8 +51,8 @@ int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
     if (tte.flag == ExactFlag) {
       score = tte.score;
 
-      if (score < - mate_score) score += pos->ply;
-      if (score > mate_score) score -= pos->ply;
+      if (score < - MATE_SCORE) score += pos->ply;
+      if (score > MATE_SCORE) score -= pos->ply;
       return score;
     }
     if ((tte.flag == UpperBound) &&  tte.score <= alpha) {
@@ -82,14 +71,14 @@ int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
     return beta;
   }
 
-  if (pos->ply > MAX_PLY - 1)
+  if (pos->ply > MAX_PLY_SEARCH - 1)
     return evaluation;
 
   if (evaluation > alpha) {
     alpha = evaluation;
   }
 
-  Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
+  Orderer orderer = Orderer(pos, &td.killer_moves, &td.history_moves, previous_best_move);
   Move current_move;
 
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
@@ -98,10 +87,11 @@ int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
     if (!make_move(&next_pos, current_move, only_captures))  {
       continue;
     }
+    td.nodes++;
   
-    score = -quiescence(&next_pos, -beta, -alpha, nodes);
+    score = -quiescence(&next_pos, -beta, -alpha, td);
 
-    if(get_stop_flag()) return 0;
+    if (search_stopped) return NO_VALUE;
     
     if (score > alpha) {
       alpha = score;
@@ -114,14 +104,11 @@ int quiescence(Position* pos, int alpha, int beta, unsigned long long& nodes) {
   return alpha;
 }
 
-int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, unsigned long long& nodes) {
-  // every 2047 nodes
-  if((nodes & 2047 ) == 0)
-    // "listen" to the GUI/user input
-    communicate();
+int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, ThreadData& td) {
+  if((td.thread_id == 0) && ((td.nodes & 2046 ) == 0))
+    check_time(td.limits);
 
-  if (repetition_detection(pos))
-    return draw_value;
+  if (pos->is_repetition()) return DRAW_VALUE;
 
   TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
@@ -134,8 +121,8 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
       if (tte.flag == ExactFlag) {
         score = tte.score;
 
-        if (score < - mate_score) score += pos->ply;
-        if (score > mate_score) score -= pos->ply;
+        if (score < - MATE_SCORE) score += pos->ply;
+        if (score > MATE_SCORE) score -= pos->ply;
         return score;
       }
       if ((tte.flag == UpperBound) &&  tte.score <= alpha) {
@@ -148,9 +135,9 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
     previous_best_move = tte.best_move;
   }
 
-  sd.pv_length[pos->ply] = pos->ply;
-  int in_check = is_square_attacked(pos, (pos->side == white) ? get_lsb_index(pos->bitboards[K]) :
-                                                                get_lsb_index(pos->bitboards[k]),
+  td.pv_length[pos->ply] = pos->ply;
+  int in_check = is_square_attacked(pos, (pos->side == WHITE) ? get_lsb_index(pos->bitboards[WK]) :
+                                                                get_lsb_index(pos->bitboards[BK]),
                                                                 ~pos->side);
 
   // increase search depth if king has been exposed to check
@@ -158,21 +145,18 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
     depth++;
 
   if (depth == 0)
-    return quiescence(pos, alpha, beta, nodes);
+    return quiescence(pos, alpha, beta, td);
 
   // static evaluation
-  if (pos->ply > MAX_PLY - 1)
+  if (pos->ply > MAX_PLY_SEARCH - 1)
     return evaluate(pos);
-
-  // increment nodes count
-  nodes++;
 
   // null move pruning
   if (null_pruning && pos->ply && depth > 3 && !pv_node && !in_check) {
     Position next_pos = Position(pos);
     make_null_move(&next_pos);
 
-    score = -negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, nodes);
+    score = -negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, td);
 
     if (score >= beta) {
       return beta;
@@ -180,33 +164,33 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
 
   }
 
-  Orderer orderer = Orderer(pos, &sd.killer_moves, &sd.history_moves, previous_best_move);
+  Orderer orderer = Orderer(pos, &td.killer_moves, &td.history_moves, previous_best_move);
   Move best_move = UNDEFINED_MOVE;
-  int best_score = -infinity;
+  int best_score = -INF;
   int legal_moves = 0;
 
   int moves_searched = 0;
   Move current_move;
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
-    if (get_stop_flag()) return 0;
     Position next_pos = Position(pos);
 
     if (!make_move(&next_pos, current_move, all_moves)) {
       continue;
     }
+    td.nodes++;
     legal_moves++;
 
     // full depth search
     if (moves_searched == 0)
       // do normal alpha beta search
-      score = -negamax(&next_pos, -beta, -alpha, depth - 1, 1, nodes);
+      score = -negamax(&next_pos, -beta, -alpha, depth - 1, 1, td);
     // late move reduction (LMR)
     else
     {
       // condition to consider LMR
       if(lmr_condition(current_move, moves_searched, in_check, depth)) {
         // search current move with reduced depth:
-        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - 2, 1, nodes);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - 2, 1, td);
       }
       else {
         score = alpha + 1;
@@ -215,14 +199,16 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
       // PVS
       if(score > alpha)
       {
-        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, 1, nodes);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, 1, td);
     
         if((score > alpha) && (score < beta))
-          score = -negamax(&next_pos, -beta, -alpha, depth-1, 1, nodes);
+          score = -negamax(&next_pos, -beta, -alpha, depth-1, 1, td);
       }
     }
 
     moves_searched++;
+
+    if (search_stopped) return NO_VALUE;
 
     if (score > best_score) {
 
@@ -233,28 +219,28 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
         
         // store history moves
         if (!get_move_capture_f(current_move))
-          sd.history_moves[get_move_piece(current_move)][get_move_target(current_move)] += depth;
+          td.history_moves[get_move_piece(current_move)][get_move_target(current_move)] += depth;
 
         alpha = score;
 
         // write PV move
-        sd.pv_table[pos->ply][pos->ply] = current_move;
+        td.pv_table[pos->ply][pos->ply] = current_move;
               
         // loop over the next ply
-        for (int next_ply = pos->ply + 1; next_ply < sd.pv_length[pos->ply + 1]; next_ply++)
+        for (int next_ply = pos->ply + 1; next_ply < td.pv_length[pos->ply + 1]; next_ply++)
           // copy move from deeper ply into a current ply's line
-          sd.pv_table[pos->ply][next_ply] = sd.pv_table[pos->ply + 1][next_ply];
+          td.pv_table[pos->ply][next_ply] = td.pv_table[pos->ply + 1][next_ply];
         
         // adjust PV length
-        sd.pv_length[pos->ply] = sd.pv_length[pos->ply + 1];
+        td.pv_length[pos->ply] = td.pv_length[pos->ply + 1];
 
         // fail-hard beta cutoff
         if (score >= beta) {
 
           // store killer moves
           if (!get_move_capture_f(current_move)) {
-            sd.killer_moves[1][pos->ply] = sd.killer_moves[0][pos->ply];
-            sd.killer_moves[0][pos->ply] = current_move;
+            td.killer_moves[1][pos->ply] = td.killer_moves[0][pos->ply];
+            td.killer_moves[0][pos->ply] = current_move;
           }
           break;
         }
@@ -264,7 +250,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
 
   if (legal_moves == 0) {
     if (in_check) {
-      return -mate_value + pos->ply; // number of move to get to mate (fav. faster mate)
+      return -MATE_VALUE + pos->ply; // number of move to get to mate (fav. faster mate)
     }
     else
       return 0;
@@ -277,72 +263,49 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, uns
   return return_score;
 }
 
-void search_position(Position* pos, int depth, unsigned long long& nodes) {
+void search_position(ThreadData& td) {
+  TimePoint top_time = get_time_ms();
 
+  Position* pos = &td.pos;
   pos->ply = 0;
 
-  int score = 0;
-  clear_search_data();
-
-  // init alpha beta
-  int alpha = -infinity, beta = infinity;
-
-  int top_time = get_time_ms();
-  reset_stop_flag();
+  int alpha = -INF, beta = INF;
   Move bestmove = UNDEFINED_MOVE;
 
   // iterative deepening
-  for (int current_depth = 1; current_depth <= depth; current_depth++) {
-    // if time is up
-    if(get_stop_flag())
-			// stop calculating and return best move so far 
-			break;
+  for (int current_depth = 1; current_depth <= td.depth; current_depth++) {
+    int score = negamax(pos, alpha, beta, current_depth, 0, td);
 
-    // find best move
-    score = negamax(pos, alpha, beta, current_depth, 0, nodes);
+    if (search_stopped) break;
 
-    // window fail go for full window
-    if ((score <= alpha) || (score >= beta)) {
-      alpha = -infinity;
-      beta = infinity;
-
-      // printf("windows fail rerun at full length\n");
-      score = negamax(pos, alpha, beta, current_depth, 0, nodes);
-    }
-
-    if(get_stop_flag())
-			// stop calculating and return best move so far 
-			break;
-
-    bestmove = sd.pv_table[0][0];
-
-    // aspiration window
-    // alpha = score - 50;
-    // beta = score + 50;
+    bestmove = td.pv_table[0][0];
     
-    if (score > -mate_value && score < -mate_score) {
-      printf("info score mate %d depth %d nodes %llu time %d pv ", -(score + mate_value) / 2 - 1, current_depth, nodes, get_time_ms() - top_time);
-    }
-    else if (score > mate_score && score < mate_value) {
-      printf("info score mate %d depth %d nodes %llu time %d pv ", (mate_value - score) / 2 + 1, current_depth, nodes, get_time_ms() - top_time); 
-    }  
-    else
-      printf("info score cp %d depth %d nodes %llu time %d pv ", score, current_depth, nodes, get_time_ms() - top_time);
-    
+    if (td.thread_id == 0) {
+      if (score > -MATE_VALUE && score < -MATE_SCORE) {
+        printf("info score mate %d depth %d nodes %llu time %lld pv ", -(score + MATE_VALUE) / 2 - 1, current_depth, td.nodes, get_time_ms() - top_time);
+      }
+      else if (score > MATE_SCORE && score < MATE_VALUE) {
+        printf("info score mate %d depth %d nodes %llu time %lld pv ", (MATE_VALUE - score) / 2 + 1, current_depth, td.nodes, get_time_ms() - top_time); 
+      }  
+      else
+        printf("info score cp %d depth %d nodes %llu time %lld pv ", score, current_depth, td.nodes, get_time_ms() - top_time);
 
-    for (int count = 0; count < sd.pv_length[0]; count++) {
-      print_move(sd.pv_table[0][count]);
-      printf(" ");
+      for (int count = 0; count < td.pv_length[0]; count++) {
+        print_move(td.pv_table[0][count]);
+        printf(" ");
+      }
+      printf("\n");
     }
-    printf("\n");
 
-    if ((score > -mate_value && score < -mate_score) || (score > mate_score && score < mate_value))
+    if ((score > -MATE_VALUE && score < -MATE_SCORE) || (score > MATE_SCORE && score < MATE_VALUE))
       break;
   }
 
-  printf("bestmove ");
-  print_move(bestmove);
-  printf("\n");
+  if (td.thread_id == 0) {
+    printf("bestmove ");
+    print_move(bestmove);
+    printf("\n");
+  }
 
 }
 
@@ -352,8 +315,4 @@ int lmr_condition(Move move, int moves_searched, int in_check, int depth) {
           (in_check == 0) && 
           (get_move_capture_f(move) == 0) &&
           (get_move_promoted(move) == 0);
-}
-
-void reset_TT() {
-  TT.clear();
 }

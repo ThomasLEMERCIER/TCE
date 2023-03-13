@@ -1,5 +1,5 @@
 ### Source files
-SRCS = bench.cpp bitboard.cpp definition.cpp evaluate.cpp move.cpp movegen.cpp orderer.cpp perft.cpp position.cpp rng.cpp search.cpp tce.cpp uci.cpp utils.cpp
+SRCS = bench.cpp bitboard.cpp definition.cpp evaluate.cpp move.cpp movegen.cpp orderer.cpp perft.cpp position.cpp rng.cpp search.cpp tce.cpp timeman.cpp ttable.cpp uci.cpp
 $(info Source file: $(SRCS))
 
 MANDATORY_FLAG = -Wall -Wcast-qual -fno-exceptions -std=c++17 -pedantic -Wextra -Wshadow -Wmissing-declarations
