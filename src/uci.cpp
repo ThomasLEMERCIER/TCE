@@ -61,7 +61,7 @@ void parse_position(Position& pos, std::istringstream& ss, bool& position_set) {
   if (token == "moves") {
     Move move;
     while (ss >> token && (move = parse_move(&pos, token)) != UNDEFINED_MOVE) {
-      make_move(&pos, move, all_moves);
+      make_move(&pos, move, ALL_MOVES);
     }
   }
   position_set = true;
@@ -124,7 +124,7 @@ void uci_loop(int argc, char* argv[]) {
 
     if (token == "quit")            break;
     else if (token == "stop")       stop_search();
-    else if (token == "uci")        std::cout << "id name TCE\nid author Thomas Lemercier\noption \nuciok\n";
+    else if (token == "uci")        std::cout << "id name TCE\nid author Thomas Lemercier\nuciok\n";
     else if (token == "isready")    std::cout << "readyok\n";
     else if (token == "ucinewgame") TT.clear();
     else if (token == "position")   parse_position(pos, ss, position_set);

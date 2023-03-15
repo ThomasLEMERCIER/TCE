@@ -6,8 +6,10 @@
 #include "timeman.hpp"
 #include "definition.hpp"
 
+#include <string>
+
 constexpr int BENCH_FEN_NB = 46;
-constexpr char const* bench_fens[BENCH_FEN_NB] = {
+const std::string bench_fens[BENCH_FEN_NB] = {
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 10",
   "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 11",
@@ -62,6 +64,7 @@ constexpr char const* bench_fens[BENCH_FEN_NB] = {
   "r2r1n2/pp2bk2/2p1p2p/3q4/3PN1QP/2P3R1/P4PP1/5RK1 w - - 0 1",
   "8/8/8/8/8/6k1/6p1/6K1 w - -",
   "7k/7P/6K1/8/3B4/8/8/8 b - -",
+
 };
 
 void bench();

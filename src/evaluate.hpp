@@ -82,10 +82,6 @@ constexpr Square mirror_score[64] = {
 	A8, B8, C8, D8, E8, F8, G8, H8
 };
 
-extern Bitboard isolated_masks[SQUARE_NB];
-extern Bitboard white_passed_masks[SQUARE_NB];
-extern Bitboard black_passed_masks[SQUARE_NB];
-
 constexpr int double_pawn_penalty = -10;
 constexpr int isolated_pawn_penalty = -10;
 constexpr int passed_pawn_bonus[8] = { 200, 150, 100, 0, 0, 0, 0, 0 }; 

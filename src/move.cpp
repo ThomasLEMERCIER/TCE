@@ -1,6 +1,6 @@
 #include "move.hpp"
 
-#include <stdio.h>
+#include <iostream>
 
 Move encode_move(Square source, Square target, Piece piece, Piece promoted, int capture_f, int double_f, int enpassant_f, int castling_f) {
   return source | (target << 6) | (piece << 12) | (promoted << 16) | (capture_f << 20) | (double_f << 21) | (enpassant_f << 22) | (castling_f << 23);
@@ -17,12 +17,9 @@ int get_move_castling_f(Move move)  { return (move& 0x800000); }
 
 void print_move(Move move) {
   if (move == UNDEFINED_MOVE)
-    printf("Undefined move");
+    std::cout << "UNDEFINED_MOVE";
   else if (get_move_promoted(move))
-    printf("%s%s%c", square_to_coordinates[get_move_source(move)],
-                     square_to_coordinates[get_move_target(move)],
-                     promoted_pieces.at(get_move_promoted(move)));
+    std::cout << square_to_coordinates[get_move_source(move)] << square_to_coordinates[get_move_target(move)] << promoted_pieces.at(get_move_promoted(move));
   else
-    printf("%s%s", square_to_coordinates[get_move_source(move)],
-                     square_to_coordinates[get_move_target(move)]);
+    std::cout << square_to_coordinates[get_move_source(move)] << square_to_coordinates[get_move_target(move)];
 }

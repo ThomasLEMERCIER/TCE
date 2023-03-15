@@ -1,6 +1,7 @@
 #include "movegen.hpp"
 
 #include <stdio.h>
+#include <iostream>
 
 void generate_moves(Position* pos, MoveList* move_list) {
   move_list->move_count = 0;
@@ -191,7 +192,7 @@ void move_push(MoveList* move_list, Move move) {
 }
 
 void print_move_list(MoveList* move_list) {
-  printf("  move    piece   double   enpassant   castling\n\n");
+  std::cout << "  move    piece   double   enpassant   castling\n\n";
   for (int count = 0; count < move_list->move_count; count++)
   {
     Move move = move_list->moves[count].move;
@@ -206,22 +207,10 @@ void print_move_list(MoveList* move_list) {
     int castling_f = get_move_castling_f(move);
 
       if (capture_f)
-        printf("  %sx%s%c  %c       %d        %d           %d\n", square_to_coordinates[source_square],
-                                                                  square_to_coordinates[target_square],
-                                                                  promoted_pieces.at(promoted),
-                                                                  ascii_pieces[piece],
-                                                                  (double_f) ? 1 : 0,
-                                                                  (enpassant_f) ? 1 : 0,
-                                                                  (castling_f) ? 1 : 0);
+        std::cout << "  " << square_to_coordinates[source_square] << "x" << square_to_coordinates[target_square] << promoted_pieces.at(promoted) << "   " << ascii_pieces[piece] << "       " << double_f << "        " << enpassant_f << "           " << castling_f << '\n';
       else
-        printf("  %s%s%c   %c       %d        %d           %d\n", square_to_coordinates[source_square],
-                                                                  square_to_coordinates[target_square],
-                                                                  promoted_pieces.at(promoted),
-                                                                  ascii_pieces[piece],
-                                                                  (double_f) ? 1 : 0,
-                                                                  (enpassant_f) ? 1 : 0,
-                                                                  (castling_f) ? 1 : 0);
+        std::cout << "  " << square_to_coordinates[source_square] << square_to_coordinates[target_square] << promoted_pieces.at(promoted) << "   " << ascii_pieces[piece] << "       " << double_f << "        " << enpassant_f << "           " << castling_f << '\n';
   
   }
-  printf("\n\n Total number of moves: %d\n\n", move_list->move_count);
+  std::cout << "\n\n" << "  Total number of moves: " << move_list->move_count << '\n' << std::endl;
 }

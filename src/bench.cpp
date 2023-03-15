@@ -1,6 +1,6 @@
 #include "bench.hpp"
 
-#include <stdio.h>
+#include <iostream>
 
 void bench() {
 
@@ -10,7 +10,7 @@ void bench() {
 
   TimePoint top_time = get_time_ms();
   for (int i_fen = 0; i_fen < BENCH_FEN_NB; ++i_fen) {
-    printf("Current position fen: %s\n", bench_fens[i_fen]);
+    std::cout << "Current position fen: " << bench_fens[i_fen] << std::endl;
 
     pos.set(bench_fens[i_fen]);
 
@@ -28,6 +28,6 @@ void bench() {
 
   TimePoint elapsed = get_time_ms() - top_time;
   double nps = 1000.0 * static_cast<double>(nodes) / static_cast<double>(elapsed);
-  printf("\n===========================\nTotal time (ms) : %lld, \nNodes searched  : %llu, \nNodes/second    : %f\n", elapsed, nodes, nps);
-  printf("%llu nodes %i nps", nodes, static_cast<int>(nps));
+  std::cout << "===========================\nTotal time (ms) : " << elapsed << ", \nNodes searched  : " << nodes << ", \nNodes/second    : " << nps << '\n';
+  std::cout << nodes << " nodes " << static_cast<int>(nps) << " nps" << std::endl;
 }

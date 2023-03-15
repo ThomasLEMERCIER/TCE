@@ -1,6 +1,5 @@
 .vscode/
-bbc/
-note/
+data/
 
 # Prerequisites
 *.d

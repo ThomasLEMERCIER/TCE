@@ -1,4 +1,5 @@
 #include "position.hpp"
+
 #include <stdio.h>
 #include <sstream>
 
@@ -126,13 +127,13 @@ void init_random_keys() {
 
   // loop over pieces and squares
   for (Piece piece = Piece::WP; piece <= Piece::BK; ++piece) {
-    for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square)
+    for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
       // init random piece keys
       piece_keys[piece][square] = rng.rand64();
   }
   
   // loop over squares
-  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square)
+  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
     // init random enpassant keys
     enpassant_keys[square] = rng.rand64();
   
@@ -174,7 +175,7 @@ int is_square_attacked(Position* pos, Square square, Color side) {
 
 
 int make_move(Position* pos, Move move, Move_Type move_flag) {
-  if (move_flag == Move_Type::all_moves) {
+  if (move_flag == Move_Type::ALL_MOVES) {
     // parse move
     Square source_square = get_move_source(move);
     Square target_square = get_move_target(move);
@@ -326,7 +327,7 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
   else {
     // check if the move is a capture
     if (get_move_capture_f(move) || get_move_enpassant_f(move)) {
-      return make_move(pos, move, Move_Type::all_moves);
+      return make_move(pos, move, Move_Type::ALL_MOVES);
     }
     else
       // don't make move

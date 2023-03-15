@@ -2,8 +2,10 @@
 #define DEFINITION_H_INCLUDED
 
 #include <unordered_map>
+#include <string>
 
-#define UNDEFINED_MOVE 0
+typedef unsigned long long U64;
+typedef unsigned long long NodeCounter;
 
 constexpr int INF = 50000;
 constexpr int MATE_VALUE = 49000;
@@ -15,15 +17,16 @@ constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY_GAME = 1000;
 constexpr int MAX_PLY_SEARCH = 64;
 
-typedef unsigned long long U64;
-typedef int Move;
-typedef int KillerMoves[2][MAX_PLY_SEARCH];
-typedef int HistoryMoves[12][64];
-typedef unsigned long long NodeCounter;
-
 constexpr int PIECE_NB = 12;
 constexpr int OCCUPANCY_NB = 3;
 constexpr int COLOR_NB = 2;
+constexpr int SQUARE_NB = 64;
+
+typedef int Move;
+typedef int KillerMoves[2][MAX_PLY_SEARCH];
+typedef int HistoryMoves[PIECE_NB][SQUARE_NB];
+
+constexpr Move UNDEFINED_MOVE = 0;
 
 enum Color: int { WHITE, BLACK, BOTH };
 
@@ -56,8 +59,8 @@ enum Square : int {
   A2, B2, C2, D2, E2, F2, G2, H2,
   A1, B1, C1, D1, E1, F1, G1, H1, NO_SQUARE,
 
-  SQUARE_NB=64,
-  FIRST_SQUARE=0
+  FIRST_SQUARE=0,
+  LAST_SQUARE=63
 };
 
 Square& operator++(Square& s);
@@ -97,10 +100,10 @@ File file_of(Square s);
 Rank rank_of(Square s);
 
 // bishop and rook
-enum Sliding_Piece { rook, bishop };
+enum Sliding_Piece { ROOK, BISHOP };
 
 // move type
-enum Move_Type { all_moves, only_captures };
+enum Move_Type { ALL_MOVES, ONLY_CAPTURES };
 
 
 /* castling bits binary representation
@@ -191,16 +194,16 @@ const std::unordered_map<int, char> promoted_pieces = {
 };
 
 // FEN dedug positions
-constexpr char const * empty_board  = "8/8/8/8/8/8/8/8 w - - ";
-constexpr char const * start_position  = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
-constexpr char const * tricky_position = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ";
-constexpr char const * killer_position  = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
-constexpr char const * cmk_position = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
+const std::string empty_board = "8/8/8/8/8/8/8/8 w - - ";
+const std::string start_position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
+const std::string tricky_position = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ";
+const std::string killer_position = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
+const std::string cmk_position = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
 
 
-constexpr char const * perft_3 = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
-constexpr char const * perft_4 = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
-constexpr char const * perft_5 = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";
-constexpr char const * perft_6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ";
+const std::string perft_3 = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
+const std::string perft_4 = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+const std::string perft_5 = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ";
+const std::string perft_6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ";
 
 #endif

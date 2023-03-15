@@ -66,7 +66,7 @@ Bitboard mask_king_attacks(Square square) {
 }
 
 void init_leapers_attacks() {
-  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square) {
+  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square) {
     pawn_attacks[Color::WHITE][square] = mask_pawn_attacks(WHITE, square);
     pawn_attacks[Color::BLACK][square] = mask_pawn_attacks(BLACK, square);
 
@@ -77,11 +77,11 @@ void init_leapers_attacks() {
 }
 
 void init_slider_attacks(Sliding_Piece piece) {
-  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square) {
+  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square) {
     Bitboard attack_mask;
     int relevant_bits_count;
 
-    if (piece == Sliding_Piece::bishop) {
+    if (piece == Sliding_Piece::BISHOP) {
       attack_mask = mask_bishop_attacks(square);
       bishop_masks[square] = attack_mask;
       relevant_bits_count = bishop_relevant_bits[square];
@@ -97,7 +97,7 @@ void init_slider_attacks(Sliding_Piece piece) {
 
     // loop over all subset of occupancy to setup the exact attacks and occupancies
     for (int index = 0; index < occupancy_subset_size; index++) {
-      if (piece == Sliding_Piece::bishop) {
+      if (piece == Sliding_Piece::BISHOP) {
         occupancy = get_occupancy_subset(index, relevant_bits_count, attack_mask);
         int magic_index = (occupancy * bishop_magic_numbers[square]) >> (64 - bishop_relevant_bits[square]);
 
@@ -222,7 +222,7 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
   Bitboard used_attacks[max_magic_size];
   Bitboard attack_mask;
 
-  if (piece == Sliding_Piece::bishop)
+  if (piece == Sliding_Piece::BISHOP)
     attack_mask = mask_bishop_attacks(square);
   else
     attack_mask = mask_rook_attacks(square);
@@ -234,7 +234,7 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
   for (index = 0; index < occupancy_subset_size; index++) {
     occupancies[index] = get_occupancy_subset(index, relevant_bits, attack_mask);
 
-    if (piece == Sliding_Piece::bishop)
+    if (piece == Sliding_Piece::BISHOP)
       attacks[index] = bishop_attacks_on_the_fly(square, occupancies[index]);
     else 
       attacks[index] = rook_attacks_on_the_fly(square, occupancies[index]);
@@ -273,20 +273,20 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
 
 void init_magic_numbers() {
   // loop over 64 board squares
-  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square)
+  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
     // print rook magic numbers
-    printf(" 0x%llxULL,\n", find_magic_number(square, rook_relevant_bits[square], rook));
+    printf(" 0x%llxULL,\n", find_magic_number(square, rook_relevant_bits[square], ROOK));
 
   // loop over 64 board squares
-  for (Square square = Square::FIRST_SQUARE; square < Square::SQUARE_NB; ++square)
+  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
     // print bishop magic numbers
-    printf(" 0x%llxULL,\n", find_magic_number(square, bishop_relevant_bits[square], bishop));
+    printf(" 0x%llxULL,\n", find_magic_number(square, bishop_relevant_bits[square], BISHOP));
 }
 
 void init_attacks() {
   init_leapers_attacks();
-  init_slider_attacks(Sliding_Piece::bishop);
-  init_slider_attacks(Sliding_Piece::rook);
+  init_slider_attacks(Sliding_Piece::BISHOP);
+  init_slider_attacks(Sliding_Piece::ROOK);
 }
 
 Bitboard get_pawn_attacks(Square square, Color side) {

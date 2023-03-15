@@ -2,10 +2,19 @@
 
 #include <stdio.h>
 #include <thread>
+#include <iostream>
 
 std::thread search_thread;
 ThreadData search_td;
 std::atomic<bool> search_stopped;
+
+inline bool lmr_condition(Move move, int moves_searched, int in_check, int depth) {
+  return  (moves_searched >= full_depth_moves) &&
+          (depth >= reduction_limit) &&
+          (in_check == 0) && 
+          (get_move_capture_f(move) == 0) &&
+          (get_move_promoted(move) == 0);
+}
 
 inline void check_time(const SearchLimits& limits) {
   if (search_stopped) return;
@@ -16,6 +25,8 @@ inline void check_time(const SearchLimits& limits) {
 }
   
 void start_search(const Position& pos, int depth, const SearchLimits& limits) {
+
+  stop_search();
   
   search_td.thread_id = 0;
   search_td.depth = depth;
@@ -84,7 +95,7 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     Position next_pos = Position(pos);
 
-    if (!make_move(&next_pos, current_move, only_captures))  {
+    if (!make_move(&next_pos, current_move, ONLY_CAPTURES))  {
       continue;
     }
     td.nodes++;
@@ -174,7 +185,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     Position next_pos = Position(pos);
 
-    if (!make_move(&next_pos, current_move, all_moves)) {
+    if (!make_move(&next_pos, current_move, ALL_MOVES)) {
       continue;
     }
     td.nodes++;
@@ -282,19 +293,19 @@ void search_position(ThreadData& td) {
     
     if (td.thread_id == 0) {
       if (score > -MATE_VALUE && score < -MATE_SCORE) {
-        printf("info score mate %d depth %d nodes %llu time %lld pv ", -(score + MATE_VALUE) / 2 - 1, current_depth, td.nodes, get_time_ms() - top_time);
+        std::cout << "info score mate " << -(score + MATE_VALUE) / 2 - 1 << " depth " << current_depth << " nodes " << td.nodes << " time " << get_time_ms() - top_time << " pv ";
       }
       else if (score > MATE_SCORE && score < MATE_VALUE) {
-        printf("info score mate %d depth %d nodes %llu time %lld pv ", (MATE_VALUE - score) / 2 + 1, current_depth, td.nodes, get_time_ms() - top_time); 
+        std::cout << "info score mate " << (MATE_VALUE - score) / 2 + 1 << " depth " << current_depth << " nodes " << td.nodes << " time " << get_time_ms() - top_time << " pv ";
       }  
       else
-        printf("info score cp %d depth %d nodes %llu time %lld pv ", score, current_depth, td.nodes, get_time_ms() - top_time);
+        std::cout << "info score cp " << score << " depth " << current_depth << " nodes " << td.nodes << " time " << get_time_ms() - top_time << " pv ";
 
       for (int count = 0; count < td.pv_length[0]; count++) {
         print_move(td.pv_table[0][count]);
-        printf(" ");
+        std::cout << " ";
       }
-      printf("\n");
+      std::cout << '\n';
     }
 
     if ((score > -MATE_VALUE && score < -MATE_SCORE) || (score > MATE_SCORE && score < MATE_VALUE))
@@ -302,17 +313,10 @@ void search_position(ThreadData& td) {
   }
 
   if (td.thread_id == 0) {
-    printf("bestmove ");
+    std::cout << "bestmove ";
     print_move(bestmove);
-    printf("\n");
+    std::cout << '\n';
+    std::cout << std::flush;
   }
-
 }
 
-int lmr_condition(Move move, int moves_searched, int in_check, int depth) {
-  return  (moves_searched >= full_depth_moves) &&
-          (depth >= reduction_limit) &&
-          (in_check == 0) && 
-          (get_move_capture_f(move) == 0) &&
-          (get_move_promoted(move) == 0);
-}

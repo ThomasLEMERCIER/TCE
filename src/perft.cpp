@@ -1,6 +1,6 @@
 #include "perft.hpp"
 
-#include <stdio.h>
+#include <iostream>
 
 void perft_driver(Position* pos, int depth, long& nodes) {
   // reccursion espace condition
@@ -16,7 +16,7 @@ void perft_driver(Position* pos, int depth, long& nodes) {
     for (int count = 0; count < move_list->move_count; count++) {
       Position next_pos = Position(pos);
 
-      if (!make_move(&next_pos, move_list->moves[count].move, all_moves))
+      if (!make_move(&next_pos, move_list->moves[count].move, ALL_MOVES))
         continue;
 
        perft_driver(&next_pos, depth - 1, nodes);
@@ -25,7 +25,7 @@ void perft_driver(Position* pos, int depth, long& nodes) {
 }
 
 void perft_test(Position* pos, int depth) {
-  printf("\n\n Performance test\n\n");
+  std::cout << "\n\n Performance test\n\n";
 
   long start = get_time_ms();
   long nodes = 0;
@@ -36,7 +36,7 @@ void perft_test(Position* pos, int depth) {
   for (int count = 0; count < move_list->move_count; count++) {
     Position next_pos = Position(pos);
 
-    if (!make_move(&next_pos, move_list->moves[count].move, all_moves))
+    if (!make_move(&next_pos, move_list->moves[count].move, ALL_MOVES))
       continue;
 
     long cummulative_nodes = nodes;
@@ -44,14 +44,13 @@ void perft_test(Position* pos, int depth) {
     perft_driver(&next_pos, depth - 1, nodes);
 
     long old_nodes = nodes - cummulative_nodes;
-    printf("    move: %s%s%c  nodes : %ld\n", square_to_coordinates[get_move_source(move_list->moves[count].move)],
-                                              square_to_coordinates[get_move_target(move_list->moves[count].move)],
-                                              (get_move_promoted(move_list->moves[count].move)) ? ascii_pieces[get_move_promoted(move_list->moves[count].move)] : ' ',
-                                              old_nodes);
+    std::cout << "    move: " << square_to_coordinates[get_move_source(move_list->moves[count].move)]
+      << square_to_coordinates[get_move_target(move_list->moves[count].move)]
+      << ((get_move_promoted(move_list->moves[count].move)) ? ascii_pieces[get_move_promoted(move_list->moves[count].move)] : ' ')
+      << "  nodes : " << old_nodes << std::endl;
   }
 
-  printf("\n    Depth: %d", depth);
-  printf("\n    Nodes: %ld", nodes);
-  printf("\n    Time: %lldms\n\n", get_time_ms() - start);
-
+  std::cout << "\n    Depth: " << depth << std::endl;
+  std::cout << "    Nodes: " << nodes << std::endl;
+  std::cout << "    Time: " << get_time_ms() - start << "ms\n" << std::endl;
 }

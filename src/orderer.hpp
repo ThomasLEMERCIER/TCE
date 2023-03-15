@@ -6,10 +6,10 @@
 #include "search.hpp"
 #include "definition.hpp"
 
-#define CAP_SCORE_SORT        10000
-#define BEST_SCORE_SORT       100000
-#define FIRST_KILLER_SORT     5000
-#define SECOND_KILLER_SORT    3000
+constexpr int BEST_SCORE_SORT     = 1000000;
+constexpr int CAP_SCORE_SORT      = 100000;
+constexpr int FIRST_KILLER_SORT   = 5000;
+constexpr int SECOND_KILLER_SORT  = 3000;
 
 class Orderer {
 public:

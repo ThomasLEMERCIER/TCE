@@ -1,7 +1,5 @@
 #include "evaluate.hpp"
 
-#include <stdio.h>
-
 Bitboard isolated_masks[SQUARE_NB];
 Bitboard white_passed_masks[SQUARE_NB];
 Bitboard black_passed_masks[SQUARE_NB];

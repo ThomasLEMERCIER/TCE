@@ -37,8 +37,6 @@ void stop_search();
 int quiescence(Position* pos, int alpha, int beta, ThreadData& td);
 int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, ThreadData& td);
 
-int lmr_condition(Move move, int moves_searched, int in_check, int depth);
-
 void search_position(ThreadData& td);
 
 constexpr int full_depth_moves = 4;
