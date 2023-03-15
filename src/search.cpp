@@ -62,8 +62,8 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
     if (tte.flag == ExactFlag) {
       score = tte.score;
 
-      if (score < - MATE_SCORE) score += pos->ply;
-      if (score > MATE_SCORE) score -= pos->ply;
+      if (score < - MATE_IN_MAX_PLY) score += pos->ply;
+      if (score > MATE_IN_MAX_PLY) score -= pos->ply;
       return score;
     }
     if ((tte.flag == UpperBound) &&  tte.score <= alpha) {
@@ -132,8 +132,8 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
       if (tte.flag == ExactFlag) {
         score = tte.score;
 
-        if (score < - MATE_SCORE) score += pos->ply;
-        if (score > MATE_SCORE) score -= pos->ply;
+        if (score < - MATE_IN_MAX_PLY) score += pos->ply;
+        if (score > MATE_IN_MAX_PLY) score -= pos->ply;
         return score;
       }
       if ((tte.flag == UpperBound) &&  tte.score <= alpha) {
@@ -261,7 +261,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
 
   if (legal_moves == 0) {
     if (in_check) {
-      return -MATE_VALUE + pos->ply; // number of move to get to mate (fav. faster mate)
+      return - (MATE_VALUE - pos->ply); // number of move to get to mate (fav. faster mate)
     }
     else
       return 0;
@@ -292,10 +292,10 @@ void search_position(ThreadData& td) {
     bestmove = td.pv_table[0][0];
     
     if (td.thread_id == 0) {
-      if (score > -MATE_VALUE && score < -MATE_SCORE) {
+      if (score > -MATE_VALUE && score < -MATE_IN_MAX_PLY) {
         std::cout << "info score mate " << -(score + MATE_VALUE) / 2 - 1 << " depth " << current_depth << " nodes " << td.nodes << " time " << get_time_ms() - top_time << " pv ";
       }
-      else if (score > MATE_SCORE && score < MATE_VALUE) {
+      else if (score > MATE_IN_MAX_PLY && score < MATE_VALUE) {
         std::cout << "info score mate " << (MATE_VALUE - score) / 2 + 1 << " depth " << current_depth << " nodes " << td.nodes << " time " << get_time_ms() - top_time << " pv ";
       }  
       else
@@ -308,7 +308,7 @@ void search_position(ThreadData& td) {
       std::cout << '\n';
     }
 
-    if ((score > -MATE_VALUE && score < -MATE_SCORE) || (score > MATE_SCORE && score < MATE_VALUE))
+    if ((score > -MATE_VALUE && score < -MATE_IN_MAX_PLY) || (score > MATE_IN_MAX_PLY && score < MATE_VALUE))
       break;
   }
 

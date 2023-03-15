@@ -7,15 +7,15 @@
 typedef unsigned long long U64;
 typedef unsigned long long NodeCounter;
 
-constexpr int INF = 50000;
-constexpr int MATE_VALUE = 49000;
-constexpr int MATE_SCORE = 48000;
-constexpr int DRAW_VALUE = 0;
-constexpr int NO_VALUE = 0;
-
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY_GAME = 1000;
 constexpr int MAX_PLY_SEARCH = 64;
+
+constexpr int INF = 50000;
+constexpr int MATE_VALUE = 49000;
+constexpr int MATE_IN_MAX_PLY = MATE_VALUE - MAX_PLY_SEARCH;
+constexpr int DRAW_VALUE = 0;
+constexpr int NO_VALUE = 50001;
 
 constexpr int PIECE_NB = 12;
 constexpr int OCCUPANCY_NB = 3;

@@ -19,8 +19,8 @@ void TranspositionTable::write_entry(Position* pos, int flag, int score, int dep
   TTEntry *hash_entry = &table[pos->hash_key % hash_size];
 
   // store mate score independently from distance to root node
-  if (score < - MATE_VALUE) score -= pos->ply;
-  if (score > MATE_SCORE) score += pos->ply;
+  if (score <= -MATE_IN_MAX_PLY) score -= pos->ply;
+  if (score >= MATE_IN_MAX_PLY) score += pos->ply;
 
   hash_entry->key = pos->hash_key;
   hash_entry->depth = depth;
