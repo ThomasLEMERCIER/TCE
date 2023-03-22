@@ -306,6 +306,7 @@ void search_position(ThreadData& td) {
         std::cout << " ";
       }
       std::cout << '\n';
+      std::cout << std::flush;
     }
 
     if ((score > -MATE_VALUE && score < -MATE_IN_MAX_PLY) || (score > MATE_IN_MAX_PLY && score < MATE_VALUE))
