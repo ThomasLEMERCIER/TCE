@@ -138,7 +138,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
 
   if (pos->enpassant != Square::NO_SQUARE)
   {
-    b1 = pawnsNotOn7 & get_pawn_attacks(pos->enpassant, ~pos->side); // symetry of attacks
+    b1 = pawnsNotOn7 & get_pawn_attacks(pos->enpassant, ~pos->side); // symmetry of attacks
     while (b1)
     {
       source_square = get_lsb_index(b1);

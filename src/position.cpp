@@ -147,7 +147,7 @@ void init_random_keys() {
 }
 
 int is_square_attacked(Position* pos, Square square, Color side) {
-  // using symetry of attack pattern
+  // using symmetry of attack pattern
 
   // white pawn attack
   if ((side == Color::WHITE) && (pawn_attacks[Color::BLACK][square] & pos->bitboards[WP])) return 1;

@@ -95,7 +95,7 @@ void init_slider_attacks(Sliding_Piece piece) {
     int occupancy_subset_size = (1 << relevant_bits_count);
     Bitboard occupancy;
 
-    // loop over all subset of occupancy to setup the exact attacks and occupancies
+    // loop over all subset of occupancy to set up the exact attacks and occupancies
     for (int index = 0; index < occupancy_subset_size; index++) {
       if (piece == Sliding_Piece::BISHOP) {
         occupancy = get_occupancy_subset(index, relevant_bits_count, attack_mask);
@@ -201,7 +201,7 @@ Bitboard get_occupancy_subset(int index, int bits_in_mask, U64 attack_mask) {
   // occupancy mask
   Bitboard occupancy = 0ULL;
 
-  // loop over all posible bit in mask
+  // loop over all possible bit in mask
   for (int count = 0; count < bits_in_mask; count++) {
     // get LSB index of attack mask
     Square square = get_lsb_index(attack_mask);
@@ -230,7 +230,7 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
   int occupancy_subset_size = 1 << relevant_bits;
 
   int index;
-  // loop over all subset of occupancy to setup the exact attacks and occupancies
+  // loop over all subset of occupancy to set up the exact attacks and occupancies
   for (index = 0; index < occupancy_subset_size; index++) {
     occupancies[index] = get_occupancy_subset(index, relevant_bits, attack_mask);
 
@@ -252,7 +252,7 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
     memset(used_attacks, 0ULL, sizeof(used_attacks));
     int fail;
 
-    // test magic number : loop over all subset of occupanc
+    // test magic number : loop over all subset of occupancy
     for (index = 0, fail = 0; !fail && index < occupancy_subset_size; index++) {
       int magic_index = (int)((occupancies[index] * magic_number) >> (64 - relevant_bits));
 

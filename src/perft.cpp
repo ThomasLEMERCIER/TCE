@@ -3,7 +3,7 @@
 #include <iostream>
 
 void perft_driver(Position* pos, int depth, long& nodes) {
-  // reccursion espace condition
+  // recursion escape condition
   if (depth == 0) {
     nodes++;
     return;
