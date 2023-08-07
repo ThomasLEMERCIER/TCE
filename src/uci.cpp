@@ -55,6 +55,10 @@ void parse_position(Position& pos, std::istringstream& ss, bool& position_set) {
     while (ss >> token && token != "moves")
       fen += token + " ";
   }
+  else {
+    std::cout << "info string error: invalid command" << std::endl;
+    return;
+  }
 
   pos.set(fen);
 
@@ -81,8 +85,8 @@ void parse_go(Position& pos, std::istringstream& ss, const bool& position_set) {
   int depth;
   
   while (ss >> token) {
-    if (token == "wtime") ss >> limits.times[Color::WHITE];
-    else if (token == "btime") ss >> limits.times[Color::BLACK];
+    if (token == "wtime") ss >> limits.remaining_times[Color::WHITE];
+    else if (token == "btime") ss >> limits.remaining_times[Color::BLACK];
     else if (token == "winc") ss >> limits.incs[Color::WHITE];
     else if (token == "binc") ss >> limits.incs[Color::BLACK];
     else if (token == "movestogo") ss >> limits.movestogo;

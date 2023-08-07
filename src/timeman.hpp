@@ -10,7 +10,7 @@ typedef std::chrono::milliseconds::rep TimePoint;
 TimePoint get_time_ms();
 
 struct SearchLimits {
-  TimePoint times[COLOR_NB];
+  TimePoint remaining_times[COLOR_NB];
   TimePoint incs[COLOR_NB];
   int movestogo;
   int depth;
@@ -19,7 +19,7 @@ struct SearchLimits {
   bool infinite;
 
   bool use_time_management() const {
-    return (!infinite) && (times[WHITE] || times[BLACK] || incs[WHITE] || incs[BLACK]);
+    return (!infinite) && (remaining_times[WHITE] || remaining_times[BLACK] || incs[WHITE] || incs[BLACK]);
   }
 };
 

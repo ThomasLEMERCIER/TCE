@@ -66,7 +66,7 @@ Bitboard mask_king_attacks(Square square) {
 }
 
 void init_leapers_attacks() {
-  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square) {
+  for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square) {
     pawn_attacks[Color::WHITE][square] = mask_pawn_attacks(WHITE, square);
     pawn_attacks[Color::BLACK][square] = mask_pawn_attacks(BLACK, square);
 
@@ -77,7 +77,7 @@ void init_leapers_attacks() {
 }
 
 void init_slider_attacks(Sliding_Piece piece) {
-  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square) {
+  for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square) {
     Bitboard attack_mask;
     int relevant_bits_count;
 
@@ -273,12 +273,12 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
 
 void init_magic_numbers() {
   // loop over 64 board squares
-  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
+  for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square)
     // print rook magic numbers
     printf(" 0x%llxULL,\n", find_magic_number(square, rook_relevant_bits[square], ROOK));
 
   // loop over 64 board squares
-  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
+  for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square)
     // print bishop magic numbers
     printf(" 0x%llxULL,\n", find_magic_number(square, bishop_relevant_bits[square], BISHOP));
 }

@@ -127,13 +127,13 @@ void init_random_keys() {
 
   // loop over pieces and squares
   for (Piece piece = Piece::WP; piece <= Piece::BK; ++piece) {
-    for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
+    for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square)
       // init random piece keys
       piece_keys[piece][square] = rng.rand64();
   }
   
   // loop over squares
-  for (Square square = Square::FIRST_SQUARE; square < Square::LAST_SQUARE; ++square)
+  for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square)
     // init random enpassant keys
     enpassant_keys[square] = rng.rand64();
   
