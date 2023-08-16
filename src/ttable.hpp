@@ -6,7 +6,7 @@
 #include "bitboard.hpp"
 #include "move.hpp"
 
-#define hash_size 800000
+constexpr int hash_size = 800000;
 
 enum TTFlag : int { ExactFlag, UpperBound, LowerBound };
 
