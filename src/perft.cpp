@@ -27,7 +27,7 @@ void perft_driver(Position* pos, int depth, long& nodes) {
 void perft_test(Position* pos, int depth) {
   std::cout << "\n\n Performance test\n\n";
 
-  long start = get_time_ms();
+  TimePoint start = get_time_ms();
   long nodes = 0;
 
   MoveList move_list[1];
