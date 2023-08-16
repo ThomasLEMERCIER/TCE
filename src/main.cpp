@@ -34,14 +34,15 @@ int main(int argc, char **argv) {
 
   if (debug) {
     printf("debug mode\n");
-    uci_loop(argc, argv);
-
     Position pos[1];
 
     pos->set(start_position);
     perft_test(pos, 6);
 
     pos->set(tricky_position);
+    perft_test(pos, 5);
+
+    pos->set(killer_position);
     perft_test(pos, 5);
 
     pos->set(perft_3);
