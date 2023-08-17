@@ -2,8 +2,9 @@
 
 #include <unordered_map>
 #include <string>
+#include <cstdint>
 
-using U64 = unsigned long long;
+using U64 = uint64_t;
 using NodeCounter = unsigned long long;
 
 constexpr int MAX_MOVES = 256;
@@ -21,8 +22,8 @@ constexpr int OCCUPANCY_NB = 3;
 constexpr int COLOR_NB = 2;
 constexpr int SQUARE_NB = 64;
 
-using Move = int;
-using KillerMoves = int[2][MAX_PLY_SEARCH];
+using Move = uint32_t; 
+using KillerMoves = Move[2][MAX_PLY_SEARCH];
 using HistoryMoves = int[PIECE_NB][SQUARE_NB];
 
 constexpr Move UNDEFINED_MOVE = 0;

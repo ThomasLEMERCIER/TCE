@@ -15,6 +15,7 @@
   0100 0000 0000 0000 0000 0000   enpassant flag (1 bit)                        0x400000
   1000 0000 0000 0000 0000 0000   castling flag (1 bit)                         0x800000
 
+  ==> need minimum 24 bits to store a move, so we use 32 bits (4 bytes)
 */
 
 struct MoveExt
