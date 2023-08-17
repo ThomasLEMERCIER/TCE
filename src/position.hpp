@@ -1,8 +1,6 @@
 #pragma once
 
 #include <string>
-#include <string.h>
-
 
 #include "definition.hpp"
 #include "bitboard.hpp"

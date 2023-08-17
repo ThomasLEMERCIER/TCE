@@ -5,7 +5,7 @@
 #include "timeman.hpp"
 #include "definition.hpp"
 
-#include <iostream> // std::cout, std::endl
+#include <iostream>
 
 void bench() {
 

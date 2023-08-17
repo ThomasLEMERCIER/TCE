@@ -2,9 +2,9 @@
 
 #include "rng.hpp"
 
-#include <string.h>  // memset
-#include <cassert>   // assert
-#include <iostream>  // std::cout, std::endl
+#include <cstring>    // memset
+#include <cassert>    // assert
+#include <iostream>
 
 Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
 Bitboard knight_attacks[SQUARE_NB];

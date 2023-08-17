@@ -9,12 +9,8 @@
 #include "ttable.hpp"
 
 #include <string>
+#include <cstring>   // strncmp
 #include <iostream>
-#include <cstdint>
-
-#include <unistd.h>
-#include <stdlib.h>
-#include <windows.h>
 
 Move parse_move(Position* pos, std::string move_string) {
 

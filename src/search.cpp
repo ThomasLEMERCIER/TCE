@@ -8,6 +8,7 @@
 #include "timeman.hpp"
 
 #include <thread>
+#include <cstring>    // memset
 #include <iostream>
 
 std::thread search_thread;

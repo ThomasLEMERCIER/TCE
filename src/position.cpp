@@ -3,6 +3,7 @@
 #include "rng.hpp"
 
 #include <sstream>
+#include <cstring>    // memcpy memset
 #include <iostream>
 
 U64 piece_keys[12][64];

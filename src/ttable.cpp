@@ -1,5 +1,7 @@
 #include "ttable.hpp"
 
+#include <cstring>    // memset
+
 TranspositionTable TT;
 
 void TranspositionTable::clear() {

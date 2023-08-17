@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unordered_map> // std::unordered_map
-#include <string> // std::string
+#include <unordered_map>
+#include <string>
 
 using U64 = unsigned long long;
 using NodeCounter = unsigned long long;
