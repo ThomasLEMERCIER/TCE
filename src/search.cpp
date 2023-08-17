@@ -32,9 +32,11 @@ inline void check_time(const SearchLimits& limits) {
 }
   
 void start_search(const Position& pos, int depth, const SearchLimits& limits) {
-
-  stop_search();
   
+  // stop previous search
+  stop_search();
+
+  // ====== reset search data ======  
   search_td.thread_id = 0;
   search_td.depth = depth;
   search_td.pos = pos;
@@ -47,7 +49,9 @@ void start_search(const Position& pos, int depth, const SearchLimits& limits) {
   memset(search_td.pv_table, 0, sizeof(search_td.pv_table));
 
   search_td.limits = limits;
+  // ===============================
 
+  // start new search
   search_stopped = false;
   search_thread = std::thread(search_position, std::ref(search_td));
 }
@@ -58,13 +62,16 @@ void stop_search() {
 }
 
 int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
+  // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
 
+  // initialize TT entry
   TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
   int score;
-
+  
+  // probe TT
   if (TT.probe(pos, tte)) {
     if (tte.flag == ExactFlag) {
       score = tte.score;
@@ -89,30 +96,40 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
     return beta;
   }
 
+  // if we search too deep, return static evaluation
   if (pos->ply > MAX_PLY_SEARCH - 1)
     return evaluation;
 
+  // update alpha if static evaluation is higher
   if (evaluation > alpha) {
     alpha = evaluation;
   }
 
+  // generate all moves
   Orderer orderer = Orderer(pos, &td.killer_moves, &td.history_moves, previous_best_move);
   Move current_move;
 
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     Position next_pos = Position(pos);
 
+    // check if move is legal
     if (!make_move(&next_pos, current_move, ONLY_CAPTURES))  {
       continue;
     }
+
+    // update node count
     td.nodes++;
   
+    // recursive call
     score = -quiescence(&next_pos, -beta, -alpha, td);
 
+    // if the search was stopped, return NO_VALUE
     if (search_stopped) return NO_VALUE;
     
+    // update alpha if score is higher
     if (score > alpha) {
       alpha = score;
+      // fail-hard beta cutoff
       if (score >= beta) {
         return beta;
       }
@@ -123,17 +140,23 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
 }
 
 int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, ThreadData& td) {
+  // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
 
+  // check for draw
   if (pos->is_repetition()) return DRAW_VALUE;
 
-  TTEntry tte;
-  Move previous_best_move = UNDEFINED_MOVE;
+  // previous alpha value and PV node flag
   int pv_node = (beta - alpha) > 1;
   int original_alpha = alpha;
+
+  // initialize TT entry
+  TTEntry tte;
+  Move previous_best_move = UNDEFINED_MOVE;
   int score;
 
+  // probe TT
   if (TT.probe(pos, tte)) {
     if (pos->ply && tte.depth >= depth && !pv_node) {
       if (tte.flag == ExactFlag) {
@@ -153,7 +176,10 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
     previous_best_move = tte.best_move;
   }
 
+  // adjust depth of the the principal variation
   td.pv_length[pos->ply] = pos->ply;
+
+  // check if king is in check
   int in_check = is_square_attacked(pos, (pos->side == WHITE) ? get_lsb_index(pos->bitboards[WK]) :
                                                                 get_lsb_index(pos->bitboards[BK]),
                                                                 ~pos->side);
@@ -162,6 +188,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
   if (in_check)
     depth++;
 
+  // check if we reached the maximum depth and return the quiescence search
   if (depth == 0)
     return quiescence(pos, alpha, beta, td);
 
@@ -182,19 +209,24 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
 
   }
 
+  // generate all moves
   Orderer orderer = Orderer(pos, &td.killer_moves, &td.history_moves, previous_best_move);
   Move best_move = UNDEFINED_MOVE;
+
   int best_score = -INF;
   int legal_moves = 0;
-
   int moves_searched = 0;
   Move current_move;
+
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     Position next_pos = Position(pos);
 
+    // check if move is legal
     if (!make_move(&next_pos, current_move, ALL_MOVES)) {
       continue;
     }
+
+    // update node counts
     td.nodes++;
     legal_moves++;
 
@@ -224,8 +256,10 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
       }
     }
 
+    // update number of moves searched
     moves_searched++;
 
+    // if the search was stopped, return NO_VALUE
     if (search_stopped) return NO_VALUE;
 
     if (score > best_score) {
@@ -266,27 +300,35 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
     }
   }
 
+  // if there are no legal moves, check if we are in check or not
   if (legal_moves == 0) {
+    // if we are in check, return mate score
     if (in_check) {
       return - (MATE_VALUE - pos->ply); // number of move to get to mate (fav. faster mate)
     }
-    else
-      return 0;
+    // otherwise return draw score
+    else {
+      return DRAW_VALUE;
+    }
   }
 
+  // update TT entry
   int tt_flag = (best_score >= beta) ? LowerBound : (alpha > original_alpha) ? ExactFlag : UpperBound;
   int return_score = (best_score >= beta) ? beta : (alpha > original_alpha) ? best_score  : alpha;
-
   TT.write_entry(pos, tt_flag, return_score, depth, best_move);
+
   return return_score;
 }
 
 void search_position(ThreadData& td) {
+  // start timer
   TimePoint top_time = get_time_ms();
 
+  // extract position
   Position* pos = &td.pos;
   pos->ply = 0;
 
+  // initialize alpha and beta
   int alpha = -INF, beta = INF;
   Move bestmove = UNDEFINED_MOVE;
 
@@ -294,10 +336,13 @@ void search_position(ThreadData& td) {
   for (int current_depth = 1; current_depth <= td.depth; current_depth++) {
     int score = negamax(pos, alpha, beta, current_depth, 0, td);
 
+    // if the search was stopped, break
     if (search_stopped) break;
 
+    // retrieve best move
     bestmove = td.pv_table[0][0];
     
+    // print info on the main thread
     if (td.thread_id == 0) {
       if (score > -MATE_VALUE && score < -MATE_IN_MAX_PLY) {
         std::cout << "info score mate " << -(score + MATE_VALUE) / 2 - 1 << " depth " << current_depth << " nodes " << td.nodes << " time " << get_time_ms() - top_time << " pv ";
@@ -316,10 +361,12 @@ void search_position(ThreadData& td) {
       std::cout << std::flush;
     }
 
+    // if the score is mate, break
     if ((score > -MATE_VALUE && score < -MATE_IN_MAX_PLY) || (score > MATE_IN_MAX_PLY && score < MATE_VALUE))
       break;
   }
 
+  // print best move
   if (td.thread_id == 0) {
     std::cout << "bestmove ";
     print_move(bestmove);
