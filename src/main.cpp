@@ -4,6 +4,8 @@
 #include "perft.hpp"
 #include "uci.hpp"
 
+#include <iostream>
+
 void init_all();
 
 void init_all() {
@@ -23,27 +25,38 @@ int main(int argc, char **argv) {
   #endif
 
   if (debug) {
-    printf("debug mode\n");
-    Position pos[1];
+    std::cout << "Debug mode" << std::endl;
 
+    init_magic_numbers();
+
+    // perft tests
+    Position pos[1];
     pos->set(start_position);
+    print_board(pos);
+
+    print_bitboard(pos->bitboards[WP]);
+    print_bitboard(pos->bitboards[BP]);
     perft_test(pos, 6);
 
     pos->set(tricky_position);
+    print_board(pos);
     perft_test(pos, 5);
 
     pos->set(killer_position);
+    print_board(pos);
     perft_test(pos, 5);
 
     pos->set(perft_3);
+    print_board(pos);
     perft_test(pos, 6);
 
     pos->set(perft_4);
+    print_board(pos);
     perft_test(pos, 5);
 
     pos->set(perft_5);
+    print_board(pos);
     perft_test(pos, 5);
-
   }
   else
     uci_loop(argc, argv);

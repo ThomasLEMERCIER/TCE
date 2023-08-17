@@ -19,7 +19,7 @@ add_compile_options(-Wall -Wcast-qual -fno-exceptions -pedantic -Wextra -Wshadow
 
 # Set debug flags
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options(-O0 -g)
+    add_compile_options(-O0 -g -DDEBUG)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Profile")
     add_compile_options(-g -pg)
 endif()

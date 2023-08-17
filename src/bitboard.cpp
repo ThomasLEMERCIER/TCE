@@ -4,6 +4,7 @@
 
 #include <string.h>  // memset
 #include <cassert>   // assert
+#include <iostream>  // std::cout, std::endl
 
 Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
 Bitboard knight_attacks[SQUARE_NB];
@@ -268,7 +269,7 @@ U64 find_magic_number(Square square, int relevant_bits, Sliding_Piece piece) {
     if (!fail)
       return magic_number;
   }
-  printf("   Magic number fails!");
+  std::cout << "Fail to find magic number" << std::endl;
   return 0ULL;
 }
 
@@ -276,12 +277,13 @@ void init_magic_numbers() {
   // loop over 64 board squares
   for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square)
     // print rook magic numbers
-    printf(" 0x%llxULL,\n", find_magic_number(square, rook_relevant_bits[square], ROOK));
+    std::cout << " 0x" << std::hex << find_magic_number(square, rook_relevant_bits[square], Sliding_Piece::ROOK) << std::dec << "ULL,\n";
 
   // loop over 64 board squares
   for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square)
     // print bishop magic numbers
-    printf(" 0x%llxULL,\n", find_magic_number(square, bishop_relevant_bits[square], BISHOP));
+    std::cout << " 0x" << std::hex << find_magic_number(square, bishop_relevant_bits[square], Sliding_Piece::BISHOP) << std::dec << "ULL,\n";
+  std::cout << std::endl;
 }
 
 void init_attacks() {
@@ -378,13 +380,13 @@ void print_bitboard(Bitboard bitboard) {
       Square square = get_square(rank, file);
 
       if (!file) {
-        printf("  %d ", 8-rank);
+        std::cout << "  " << 8 - rank << " ";
       }
-
-      printf(" %d", (bitboard & (1ULL << square)) ? 1 : 0);
+      std::cout << " " << ((bitboard & (1ULL << square)) ? 1 : 0);
     }
-    printf("\n");
+    std::cout << '\n';
   }
-  printf("\n     a b c d e f g h\n\n");
-  printf("     Bitboard: %llud\n\n", bitboard);
+  std::cout << "\n     a b c d e f g h\n\n";
+  std::cout << "     Bitboard: " << std::hex << bitboard << std::dec << '\n' << std::endl;
+
 }

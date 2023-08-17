@@ -3,6 +3,7 @@
 #include "rng.hpp"
 
 #include <sstream>
+#include <iostream>
 
 U64 piece_keys[12][64];
 U64 side_key;
@@ -356,7 +357,7 @@ void print_board(Position* pos) {
       Square square = get_square(rank, file);
 
       if (!file) {
-        printf("  %d ", 8-rank);
+        std::cout << "  " << 8 - rank << " ";
       }
 
       Piece piece = Piece::NO_PIECE;
@@ -366,20 +367,17 @@ void print_board(Position* pos) {
           piece = piece_bb; break;
         }
       }
-
-      printf(" %c", (piece == Piece::NO_PIECE) ? '.' : ascii_pieces[piece]);
+      std::cout << " " << ((piece == Piece::NO_PIECE) ? '.' : ascii_pieces[piece]);
     }
-    printf("\n");
+    std::cout << '\n';
   }
 
-  printf("\n     a b c d e f g h\n\n");
-  printf("     Side:     %s\n", (pos->side == Color::WHITE) ? "white" : "black");
-  printf("     En Passant:  %s\n", (pos->enpassant != Square::NO_SQUARE) ? square_to_coordinates[pos->enpassant] : "no");
-  printf("     Casting:   %c%c%c%c\n\n", (pos->castle_rights & Castle_Right::WOO) ? 'K' : '-',
-                                         (pos->castle_rights & Castle_Right::WOOO) ? 'Q' : '-',
-                                         (pos->castle_rights & Castle_Right::BOO) ? 'k' : '-',
-                                         (pos->castle_rights & Castle_Right::BOOO) ? 'q' : '-');
-  printf("   Hash Key:  %llx\n", pos->hash_key);
+
+  std::cout << "\n     a b c d e f g h\n\n";
+  std::cout << "     Side:     " << ((pos->side == Color::WHITE) ? "white" : "black") << '\n';
+  std::cout << "     En Passant:  " << ((pos->enpassant != Square::NO_SQUARE) ? square_to_coordinates[pos->enpassant] : "no") << '\n';
+  std::cout << "     Casting:   " << ((pos->castle_rights & Castle_Right::WOO) ? 'K' : '-') << ((pos->castle_rights & Castle_Right::WOOO) ? 'Q' : '-') << ((pos->castle_rights & Castle_Right::BOO) ? 'k' : '-') << ((pos->castle_rights & Castle_Right::BOOO) ? 'q' : '-') << '\n';
+  std::cout << "\n   Hash Key:  " << std::hex << pos->hash_key << std::dec << std::endl;
 
 }
 
