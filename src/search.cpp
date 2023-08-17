@@ -10,7 +10,7 @@ std::atomic<bool> search_stopped;
 
 inline bool lmr_condition(Move move, int moves_searched, int in_check, int depth) {
   return  (moves_searched >= full_depth_moves) &&
-          (depth >= reduction_limit) &&
+          (depth >= lmr_reduction) &&
           (in_check == 0) && 
           (get_move_capture_f(move) == 0) &&
           (get_move_promoted(move) == 0);
@@ -51,7 +51,7 @@ void stop_search() {
 }
 
 int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
-  if((td.thread_id == 0) && ((td.nodes & 2046 ) == 0))
+  if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
 
   TTEntry tte;
@@ -116,7 +116,7 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
 }
 
 int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, ThreadData& td) {
-  if((td.thread_id == 0) && ((td.nodes & 2046 ) == 0))
+  if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
 
   if (pos->is_repetition()) return DRAW_VALUE;
@@ -163,11 +163,11 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
     return evaluate(pos);
 
   // null move pruning
-  if (null_pruning && pos->ply && depth > 3 && !pv_node && !in_check) {
+  if (null_pruning && pos->ply && depth > null_move_reduction && !pv_node && !in_check) {
     Position next_pos = Position(pos);
     make_null_move(&next_pos);
 
-    score = -negamax(&next_pos, -beta, -beta + 1, depth - 3, 0, td);
+    score = -negamax(&next_pos, -beta, -beta + 1, depth - null_move_reduction, 0, td);
 
     if (score >= beta) {
       return beta;
@@ -201,7 +201,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
       // condition to consider LMR
       if(lmr_condition(current_move, moves_searched, in_check, depth)) {
         // search current move with reduced depth:
-        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - 2, 1, td);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - lmr_reduction, 1, td);
       }
       else {
         score = alpha + 1;

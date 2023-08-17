@@ -40,6 +40,9 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
 void search_position(ThreadData& td);
 
 constexpr int full_depth_moves = 4;
-constexpr int reduction_limit = 3;
+constexpr int lmr_reduction = 3;
+constexpr int null_move_reduction = 3;
+
+constexpr int check_every_nodes = 2046;
 
 #endif
