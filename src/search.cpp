@@ -139,7 +139,7 @@ int quiescence(Position* pos, Score alpha, Score beta, ThreadData& td) {
   return alpha;
 }
 
-int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning, ThreadData& td) {
+int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning, ThreadData& td) {
   // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
@@ -201,7 +201,7 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning,
     Position next_pos = Position(pos);
     make_null_move(&next_pos);
 
-    score = -negamax(&next_pos, -beta, -beta + 1, depth - null_move_reduction, 0, td);
+    score = -negamax(&next_pos, -beta, -beta + 1, depth - null_move_reduction, false, td);
 
     if (score >= beta) {
       return beta;
@@ -233,14 +233,14 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning,
     // full depth search
     if (moves_searched == 0)
       // do normal alpha beta search
-      score = -negamax(&next_pos, -beta, -alpha, depth - 1, 1, td);
+      score = -negamax(&next_pos, -beta, -alpha, depth - 1, true, td);
     // late move reduction (LMR)
     else
     {
       // condition to consider LMR
       if(lmr_condition(current_move, moves_searched, in_check, depth)) {
         // search current move with reduced depth:
-        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - lmr_reduction, 1, td);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth - lmr_reduction, true, td);
       }
       else {
         score = alpha + 1;
@@ -249,10 +249,10 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning,
       // PVS
       if(score > alpha)
       {
-        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, 1, td);
+        score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, true, td);
     
         if((score > alpha) && (score < beta))
-          score = -negamax(&next_pos, -beta, -alpha, depth-1, 1, td);
+          score = -negamax(&next_pos, -beta, -alpha, depth-1, true, td);
       }
     }
 
@@ -313,7 +313,7 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning,
   }
 
   // update TT entry
-  int tt_flag = (best_score >= beta) ? LowerBound : (alpha > original_alpha) ? ExactFlag : UpperBound;
+  TTFlag tt_flag = (best_score >= beta) ? LowerBound : (alpha > original_alpha) ? ExactFlag : UpperBound;
   Score return_score = (best_score >= beta) ? beta : (alpha > original_alpha) ? best_score  : alpha;
   TT.write_entry(pos, tt_flag, return_score, depth, best_move);
 
@@ -334,7 +334,7 @@ void search_position(ThreadData& td) {
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= td.depth; current_depth++) {
-    Score score = negamax(pos, alpha, beta, current_depth, 0, td);
+    Score score = negamax(pos, alpha, beta, current_depth, false, td);
 
     // if the search was stopped, break
     if (search_stopped) break;
