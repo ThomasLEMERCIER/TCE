@@ -15,7 +15,7 @@ if (-not (Test-Path $BUILD_DIR)) {
 Set-Location -Path $BUILD_DIR
 
 # Run CMake from the build directory
-cmake $PROJECT_DIR
+cmake $PROJECT_DIR -DCMAKE_BUILD_TYPE=Release   
 
 # Print a message indicating completion
 Write-Host "Build setup complete."
