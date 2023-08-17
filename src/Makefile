@@ -8,8 +8,8 @@ SRCS = $(wildcard *.cpp)
 OBJS = $(patsubst %.cpp, $(OBJECT_DIR)/%.o, $(SRCS))
 
 MANDATORY_FLAG = -Wall -Wcast-qual -fno-exceptions -std=c++20 -pedantic -Wextra -Wshadow -Wmissing-declarations -Wunused
-OPTI_FLAG = -O3 -march=native
-RELEASE_NAME = tce.exe
+OPTI_FLAG = -O3 -march=native -flto -funroll-loops -fomit-frame-pointer -ffast-math -finline-functions -fno-rtti
+RELEASE_NAME = TCE.exe
 
 all: $(RELEASE_NAME)
 
