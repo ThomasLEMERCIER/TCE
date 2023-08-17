@@ -1,6 +1,7 @@
 #include "position.hpp"
 
 #include "rng.hpp"
+#include "move.hpp"
 
 #include <sstream>
 #include <cstring>    // memcpy memset

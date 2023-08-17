@@ -2,7 +2,6 @@
 
 #include "definition.hpp"
 #include "position.hpp"
-#include "move.hpp"
 
 constexpr int hash_size = 800000;
 

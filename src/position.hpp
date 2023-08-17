@@ -4,7 +4,6 @@
 
 #include "definition.hpp"
 #include "bitboard.hpp"
-#include "move.hpp"
 
 extern U64 piece_keys[12][64];
 extern U64 side_key;
