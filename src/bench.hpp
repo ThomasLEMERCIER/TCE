@@ -1,11 +1,6 @@
 #pragma once
 
-#include "position.hpp"
-#include "search.hpp"
-#include "timeman.hpp"
-#include "definition.hpp"
-
-#include <string>
+#include <string> // std::string
 
 constexpr int BENCH_FEN_NB = 46;
 const std::string bench_fens[BENCH_FEN_NB] = {

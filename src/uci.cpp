@@ -1,10 +1,17 @@
 #include "uci.hpp"
 
+#include "timeman.hpp"
+#include "movegen.hpp"
+#include "move.hpp"
+#include "search.hpp"
+#include "bench.hpp"
+#include "definition.hpp"
+#include "ttable.hpp"
+
 #include <string>
 #include <iostream>
 #include <cstdint>
 
-#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <windows.h>

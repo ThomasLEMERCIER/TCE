@@ -1,7 +1,6 @@
 #pragma once
 
 #include "definition.hpp"
-#include "bitboard.hpp"
 #include "position.hpp"
 
 constexpr int material_score[12] = {

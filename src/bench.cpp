@@ -1,6 +1,11 @@
 #include "bench.hpp"
 
-#include <iostream>
+#include "position.hpp"
+#include "search.hpp"
+#include "timeman.hpp"
+#include "definition.hpp"
+
+#include <iostream> // std::cout, std::endl
 
 void bench() {
 

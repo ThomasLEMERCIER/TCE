@@ -1,5 +1,6 @@
 #include "orderer.hpp"
 
+#include "search.hpp"
 
 Orderer::Orderer(Position* p, KillerMoves* km, HistoryMoves* hm, Move p_best_move) : pos(p), killer_moves(km), history_moves(hm), previous_best_move(p_best_move) {
   generate_moves(pos, &move_list);  

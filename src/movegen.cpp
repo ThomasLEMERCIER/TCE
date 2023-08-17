@@ -1,6 +1,7 @@
 #include "movegen.hpp"
 
-#include <stdio.h>
+#include "bitboard.hpp"
+
 #include <iostream>
 
 void generate_moves(Position* pos, MoveList* move_list) {

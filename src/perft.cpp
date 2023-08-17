@@ -1,5 +1,8 @@
 #include "perft.hpp"
 
+#include "movegen.hpp"
+#include "timeman.hpp"
+
 #include <iostream>
 
 void perft_driver(Position* pos, int depth, long& nodes) {

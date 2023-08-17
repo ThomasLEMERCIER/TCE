@@ -1,6 +1,7 @@
 #include "position.hpp"
 
-#include <stdio.h>
+#include "rng.hpp"
+
 #include <sstream>
 
 U64 piece_keys[12][64];

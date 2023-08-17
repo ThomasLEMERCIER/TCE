@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cassert>
-
 #include "definition.hpp"
 
 using Bitboard = U64;

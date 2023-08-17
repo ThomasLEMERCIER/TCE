@@ -1,5 +1,7 @@
 #include "timeman.hpp"
 
+#include "definition.hpp"
+
 #include <chrono>
 
 TimeManager tm;

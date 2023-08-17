@@ -1,15 +1,9 @@
 #pragma once
 
+#include "definition.hpp"
 #include "position.hpp"
-#include "definition.hpp"
-#include "bitboard.hpp"
-#include "definition.hpp"
-#include "movegen.hpp"
 #include "move.hpp"
-#include "evaluate.hpp"
 #include "timeman.hpp"
-#include "orderer.hpp"
-#include "ttable.hpp"
 
 #include <atomic>
 

@@ -1,6 +1,12 @@
 #include "search.hpp"
 
-#include <stdio.h>
+#include "bitboard.hpp"
+#include "movegen.hpp"
+#include "orderer.hpp"
+#include "evaluate.hpp"
+#include "ttable.hpp"
+#include "timeman.hpp"
+
 #include <thread>
 #include <iostream>
 

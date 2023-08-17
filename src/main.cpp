@@ -1,17 +1,7 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unordered_map>
-
 #include "definition.hpp"
-#include "movegen.hpp"
 #include "position.hpp"
-#include "bitboard.hpp"
-#include "move.hpp"
-#include "timeman.hpp"
+#include "evaluate.hpp"
 #include "perft.hpp"
-#include "search.hpp"
 #include "uci.hpp"
 
 void init_all();

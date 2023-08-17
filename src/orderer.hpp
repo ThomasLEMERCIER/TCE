@@ -2,7 +2,6 @@
 
 #include "movegen.hpp"
 #include "move.hpp"
-#include "search.hpp"
 #include "definition.hpp"
 
 constexpr int BEST_SCORE_SORT     = 1000000;

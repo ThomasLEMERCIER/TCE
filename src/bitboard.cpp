@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <string.h>
-
 #include "bitboard.hpp"
+
 #include "rng.hpp"
+
+#include <string.h>  // memset
+#include <cassert>   // assert
 
 Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
 Bitboard knight_attacks[SQUARE_NB];

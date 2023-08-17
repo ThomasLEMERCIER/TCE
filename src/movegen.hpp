@@ -2,7 +2,6 @@
 
 #include "definition.hpp"
 #include "position.hpp"
-#include "bitboard.hpp"
 #include "move.hpp"
 
 struct MoveList {

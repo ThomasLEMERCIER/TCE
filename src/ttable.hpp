@@ -1,8 +1,7 @@
 #pragma once
 
-#include "position.hpp"
 #include "definition.hpp"
-#include "bitboard.hpp"
+#include "position.hpp"
 #include "move.hpp"
 
 constexpr int hash_size = 800000;
