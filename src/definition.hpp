@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <string>
 
-typedef unsigned long long U64;
-typedef unsigned long long NodeCounter;
+using U64 = unsigned long long;
+using NodeCounter = unsigned long long;
 
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY_GAME = 1000;
@@ -21,9 +21,9 @@ constexpr int OCCUPANCY_NB = 3;
 constexpr int COLOR_NB = 2;
 constexpr int SQUARE_NB = 64;
 
-typedef int Move;
-typedef int KillerMoves[2][MAX_PLY_SEARCH];
-typedef int HistoryMoves[PIECE_NB][SQUARE_NB];
+using Move = int;
+using KillerMoves = int[2][MAX_PLY_SEARCH];
+using HistoryMoves = int[PIECE_NB][SQUARE_NB];
 
 constexpr Move UNDEFINED_MOVE = 0;
 

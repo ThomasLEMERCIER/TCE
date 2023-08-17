@@ -4,7 +4,7 @@
 
 #include <chrono>
 
-typedef std::chrono::milliseconds::rep TimePoint;
+using TimePoint = std::chrono::milliseconds::rep;
 
 TimePoint get_time_ms();
 

@@ -4,7 +4,7 @@
 
 #include "definition.hpp"
 
-typedef U64 Bitboard;
+using Bitboard = U64;
 
 // bishop:rook maximal occupancy subset size
 constexpr int bishop_magic_size = 512;
