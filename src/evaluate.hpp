@@ -1,5 +1,4 @@
-#ifndef EVALUATE_H_INCLUDED
-#define EVALUATE_H_INCLUDED
+#pragma once
 
 #include "definition.hpp"
 #include "bitboard.hpp"
@@ -92,5 +91,3 @@ constexpr int king_shield_bonus = 5;
 
 void init_evaluation_masks();
 int evaluate(Position* pos);
-
-#endif

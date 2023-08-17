@@ -1,5 +1,4 @@
-#ifndef TTABLE_H_INCLUDED
-#define TTABLE_H_INCLUDED
+#pragma once
 
 #include "position.hpp"
 #include "definition.hpp"
@@ -28,5 +27,3 @@ public:
 };
 
 extern TranspositionTable TT;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef POSITION_H_INCLUDED
-#define POSITION_H_INCLUDED
+#pragma once
 
 #include <string>
 #include <string.h>
@@ -45,5 +44,3 @@ void init_random_keys();
 void print_board(Position* pos);
 
 void copy_position(Position* dst, Position* src);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOVE_H_INCLUDED
-#define MOVE_H_INCLUDED
+#pragma once
 
 #include "definition.hpp"
 
@@ -37,5 +36,3 @@ int get_move_enpassant_f(Move move);
 int get_move_castling_f(Move move);
 
 void print_move(Move move);
-
-#endif

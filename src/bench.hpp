@@ -1,5 +1,4 @@
-#ifndef BENCH_H_INCLUDED
-#define BENCH_H_INCLUDED
+#pragma once
 
 #include "position.hpp"
 #include "search.hpp"
@@ -68,5 +67,3 @@ const std::string bench_fens[BENCH_FEN_NB] = {
 };
 
 void bench();
-
-#endif

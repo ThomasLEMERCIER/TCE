@@ -1,5 +1,4 @@
-#ifndef MOVEGEN_H_INCLUDED
-#define MOVEGEN_H_INCLUDED
+#pragma once
 
 #include "definition.hpp"
 #include "position.hpp"
@@ -21,5 +20,3 @@ void generate_castle_moves(Position* pos, MoveList* move_list);
 void move_push(MoveList* move_list, Move move);
 
 void print_move_list(MoveList* move_list);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ORDERER_H_INCLUDED
-#define ORDERER_H_INCLUDED
+#pragma once
 
 #include "movegen.hpp"
 #include "move.hpp"
@@ -53,5 +52,3 @@ constexpr int mvv_lva[12][12] = {
 	101, 201, 301, 401, 501, 601,  101, 201, 301, 401, 501, 601,
 	100, 200, 300, 400, 500, 600,  100, 200, 300, 400, 500, 600
 };
-
-#endif

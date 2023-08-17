@@ -1,5 +1,4 @@
-#ifndef RNG_H_INCLUDED
-#define RNG_H_INCLUDED
+#pragma once
 
 #include "definition.hpp"
 
@@ -14,5 +13,3 @@ public:
 
   U64 magic_rand();
 };
-
-#endif

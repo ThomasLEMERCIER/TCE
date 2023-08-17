@@ -9,7 +9,6 @@ OBJS = $(patsubst %.cpp, $(OBJECT_DIR)/%.o, $(SRCS))
 
 MANDATORY_FLAG = -Wall -Wcast-qual -fno-exceptions -std=c++20 -pedantic -Wextra -Wshadow -Wmissing-declarations -Wunused
 OPTI_FLAG = -O3 -march=native
-DEBUG_FLAG = -DDEBUG
 RELEASE_NAME = tce.exe
 
 all: $(RELEASE_NAME)

@@ -1,5 +1,4 @@
-#ifndef SEARCH_H_INCLUDED
-#define SEARCH_H_INCLUDED
+#pragma once
 
 #include "position.hpp"
 #include "definition.hpp"
@@ -44,5 +43,3 @@ constexpr int lmr_reduction = 3;
 constexpr int null_move_reduction = 3;
 
 constexpr int check_every_nodes = 2046;
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef BITBOARD_H_INCLUDED
-#define BITBOARD_H_INCLUDED
+#pragma once
 
 #include <cassert>
 
@@ -261,5 +260,3 @@ Bitboard get_attacks_bb(Square square, Bitboard occupancy) {
          (piece == Piece::WQ) || (piece == Piece::BQ) ? get_queen_attacks(square, occupancy)  :
          (piece == Piece::WK) || (piece == Piece::BK) ? get_king_attacks(square)              : 0ULL;
 }
-
-#endif
