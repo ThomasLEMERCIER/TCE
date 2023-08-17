@@ -49,8 +49,8 @@ void init_evaluation_masks() {
   }
 }
 
-int evaluate(Position* pos) {
-  int score = 0;
+Score evaluate(Position* pos) {
+  Score score = 0;
 
   U64 bitboard;
   Square square;

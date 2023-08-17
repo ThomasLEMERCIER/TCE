@@ -3,7 +3,7 @@
 #include "definition.hpp"
 #include "position.hpp"
 
-constexpr int material_score[12] = {
+constexpr Score material_score[12] = {
   100,      // white pawn score
   300,      // white knight score
   350,      // white bishop score
@@ -17,7 +17,7 @@ constexpr int material_score[12] = {
   -1000,    // black queen score
   -10000,   // black king score
 };
-constexpr int pawn_score[64] = {
+constexpr Score pawn_score[64] = {
   90,  90,  90,  90,  90,  90,  90,  90,
   30,  30,  30,  40,  40,  30,  30,  30,
   20,  20,  20,  30,  30,  30,  20,  20,
@@ -27,7 +27,7 @@ constexpr int pawn_score[64] = {
     0,   0,   0, -10, -10,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0
 };
-constexpr int knight_score[64] = {
+constexpr Score knight_score[64] = {
   -5,   0,   0,   0,   0,   0,   0,  -5,
   -5,   0,   0,  10,  10,   0,   0,  -5,
   -5,   5,  20,  20,  20,  20,   5,  -5,
@@ -37,7 +37,7 @@ constexpr int knight_score[64] = {
   -5,   0,   0,   0,   0,   0,   0,  -5,
   -5, -10,   0,   0,   0,   0, -10,  -5
 };
-constexpr int bishop_score[64] = {
+constexpr Score bishop_score[64] = {
   0,   0,   0,   0,   0,   0,   0,   0,
   0,   0,   0,   0,   0,   0,   0,   0,
   0,  20,   0,  10,  10,   0,  20,   0,
@@ -47,7 +47,7 @@ constexpr int bishop_score[64] = {
   0,  30,   0,   0,   0,   0,  30,   0,
   0,   0, -10,   0,   0, -10,   0,   0
 };
-constexpr int rook_score[64] = {
+constexpr Score rook_score[64] = {
   50,  50,  50,  50,  50,  50,  50,  50,
   50,  50,  50,  50,  50,  50,  50,  50,
   0,    0,  10,  20,  20,  10,   0,   0,
@@ -58,7 +58,7 @@ constexpr int rook_score[64] = {
   0,    0,   0,  20,  20,   0,   0,   0
 
 };
-constexpr int king_score[64] = {
+constexpr Score king_score[64] = {
   0,   0,   0,   0,   0,   0,   0,   0,
   0,   0,   5,   5,   5,   5,   0,   0,
   0,   5,   5,  10,  10,   5,   5,   0,
@@ -80,13 +80,13 @@ constexpr Square mirror_score[64] = {
 	A8, B8, C8, D8, E8, F8, G8, H8
 };
 
-constexpr int double_pawn_penalty = -10;
-constexpr int isolated_pawn_penalty = -10;
-constexpr int passed_pawn_bonus[8] = { 200, 150, 100, 0, 0, 0, 0, 0 }; 
+constexpr Score double_pawn_penalty = -10;
+constexpr Score isolated_pawn_penalty = -10;
+constexpr Score passed_pawn_bonus[8] = { 200, 150, 100, 0, 0, 0, 0, 0 }; 
 
-constexpr int semi_open_file_score = 10;
-constexpr int open_file_score = 15;
-constexpr int king_shield_bonus = 5;
+constexpr Score semi_open_file_score = 10;
+constexpr Score open_file_score = 15;
+constexpr Score king_shield_bonus = 5;
 
 void init_evaluation_masks();
-int evaluate(Position* pos);
+Score evaluate(Position* pos);

@@ -27,8 +27,8 @@ struct ThreadData {
 void start_search(const Position& pos, int depth, const SearchLimits& limits);
 void stop_search();
 
-int quiescence(Position* pos, int alpha, int beta, ThreadData& td);
-int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, ThreadData& td);
+int quiescence(Position* pos, Score alpha, Score beta, ThreadData& td);
+int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning, ThreadData& td);
 
 void search_position(ThreadData& td);
 

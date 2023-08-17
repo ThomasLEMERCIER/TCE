@@ -4,18 +4,19 @@
 #include <string>
 #include <cstdint>
 
-using U64 = uint64_t;
+using U64 = uint_fast64_t;
 using NodeCounter = unsigned long long;
+using Score = int32_t;
 
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY_GAME = 1000;
 constexpr int MAX_PLY_SEARCH = 64;
 
-constexpr int INF = 50000;
-constexpr int MATE_VALUE = 49000;
-constexpr int MATE_IN_MAX_PLY = MATE_VALUE - MAX_PLY_SEARCH;
-constexpr int DRAW_VALUE = 0;
-constexpr int NO_VALUE = 50001;
+constexpr Score INF = 50000;
+constexpr Score MATE_VALUE = 49000;
+constexpr Score MATE_IN_MAX_PLY = MATE_VALUE - MAX_PLY_SEARCH;
+constexpr Score DRAW_VALUE = 0;
+constexpr Score NO_VALUE = 50001;
 
 constexpr int PIECE_NB = 12;
 constexpr int OCCUPANCY_NB = 3;

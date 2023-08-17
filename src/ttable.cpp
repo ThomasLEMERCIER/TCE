@@ -20,7 +20,7 @@ bool TranspositionTable::probe(Position* pos, TTEntry& tte) {
   return false;
 }
 
-void TranspositionTable::write_entry(Position* pos, int flag, int score, int depth, Move move) {
+void TranspositionTable::write_entry(Position* pos, int flag, Score score, int depth, Move move) {
   // always replace scheme
   TTEntry *hash_entry = &table[pos->hash_key % hash_size];
 

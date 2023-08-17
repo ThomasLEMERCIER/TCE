@@ -11,7 +11,7 @@ struct TTEntry {
   U64 key;          // hash key of position
   int depth;        // depth to get value
   int flag;         // flag for the type of node (fail-high/fail-low/PV)
-  int score;        // score (beta/alpha/PV)
+  Score score;        // score (beta/alpha/PV)
   Move best_move;   // best move found
 };
 
@@ -20,7 +20,7 @@ public:
   TTEntry table[hash_size];
 
   bool probe(Position* pos, TTEntry& tte);
-  void write_entry(Position* pos, int flag, int score, int depth, Move move);
+  void write_entry(Position* pos, int flag, Score score, int depth, Move move);
   void clear();
 };
 

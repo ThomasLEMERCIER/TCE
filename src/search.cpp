@@ -61,7 +61,7 @@ void stop_search() {
   if (search_thread.joinable()) search_thread.join();
 }
 
-int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
+int quiescence(Position* pos, Score alpha, Score beta, ThreadData& td) {
   // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
@@ -69,7 +69,7 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
   // initialize TT entry
   TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
-  int score;
+  Score score;
   
   // probe TT
   if (TT.probe(pos, tte)) {
@@ -89,7 +89,7 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
     previous_best_move = tte.best_move;
   }
 
-  int evaluation = evaluate(pos);
+  Score evaluation = evaluate(pos);
 
   // fail-hard beta cutoff
   if (evaluation >= beta) {
@@ -139,7 +139,7 @@ int quiescence(Position* pos, int alpha, int beta, ThreadData& td) {
   return alpha;
 }
 
-int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, ThreadData& td) {
+int negamax(Position* pos, Score alpha, Score beta, int depth, int null_pruning, ThreadData& td) {
   // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
@@ -149,12 +149,12 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
 
   // previous alpha value and PV node flag
   int pv_node = (beta - alpha) > 1;
-  int original_alpha = alpha;
+  Score original_alpha = alpha;
 
   // initialize TT entry
   TTEntry tte;
   Move previous_best_move = UNDEFINED_MOVE;
-  int score;
+  Score score;
 
   // probe TT
   if (TT.probe(pos, tte)) {
@@ -213,7 +213,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
   Orderer orderer = Orderer(pos, &td.killer_moves, &td.history_moves, previous_best_move);
   Move best_move = UNDEFINED_MOVE;
 
-  int best_score = -INF;
+  Score best_score = -INF;
   int legal_moves = 0;
   int moves_searched = 0;
   Move current_move;
@@ -314,7 +314,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
 
   // update TT entry
   int tt_flag = (best_score >= beta) ? LowerBound : (alpha > original_alpha) ? ExactFlag : UpperBound;
-  int return_score = (best_score >= beta) ? beta : (alpha > original_alpha) ? best_score  : alpha;
+  Score return_score = (best_score >= beta) ? beta : (alpha > original_alpha) ? best_score  : alpha;
   TT.write_entry(pos, tt_flag, return_score, depth, best_move);
 
   return return_score;
@@ -329,12 +329,12 @@ void search_position(ThreadData& td) {
   pos->ply = 0;
 
   // initialize alpha and beta
-  int alpha = -INF, beta = INF;
+  Score alpha = -INF, beta = INF;
   Move bestmove = UNDEFINED_MOVE;
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= td.depth; current_depth++) {
-    int score = negamax(pos, alpha, beta, current_depth, 0, td);
+    Score score = negamax(pos, alpha, beta, current_depth, 0, td);
 
     // if the search was stopped, break
     if (search_stopped) break;
