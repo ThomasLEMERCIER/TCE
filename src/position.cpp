@@ -150,35 +150,36 @@ void init_random_keys() {
   side_key = rng.rand64();
 }
 
-int is_square_attacked(Position* pos, Square square, Color side) {
+bool is_square_attacked(Position* pos, Square square, Color side) {
   // using symmetry of attack pattern
 
   // white pawn attack
-  if ((side == Color::WHITE) && (pawn_attacks[Color::BLACK][square] & pos->bitboards[WP])) return 1;
+  if ((side == Color::WHITE) && (pawn_attacks[Color::BLACK][square] & pos->bitboards[WP])) return true;
 
   // black pawn attack
-  if ((side == Color::BLACK) && (pawn_attacks[Color::WHITE][square] & pos->bitboards[BP])) return 1;
+  if ((side == Color::BLACK) && (pawn_attacks[Color::WHITE][square] & pos->bitboards[BP])) return true;
 
   // knight attack
-  if (knight_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[WN] :pos-> bitboards[BN])) return 1;
+  if (knight_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[WN] :pos-> bitboards[BN])) return true;
 
   // bishop attack
-  if (get_bishop_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WB] : pos->bitboards[BB])) return 1;
+  if (get_bishop_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WB] : pos->bitboards[BB])) return true;
 
   // bishop attack
-  if (get_rook_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WR] : pos->bitboards[BR])) return 1;
+  if (get_rook_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WR] : pos->bitboards[BR])) return true;
 
   // queen attack
-  if (get_queen_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WQ] : pos->bitboards[BQ])) return 1;
+  if (get_queen_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WQ] : pos->bitboards[BQ])) return true;
 
   // king attack
-  if (king_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[WK] : pos->bitboards[BK])) return 1;
+  if (king_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[WK] : pos->bitboards[BK])) return true;
 
-  return 0;
+  return false;
 }
 
 
-int make_move(Position* pos, Move move, Move_Type move_flag) {
+bool make_move(Position* pos, Move move, Move_Type move_flag) {
+  // return false if the move is illegal, true otherwise
   if (move_flag == Move_Type::ALL_MOVES) {
     // parse move
     Square source_square = get_move_source(move);
@@ -322,10 +323,10 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
 
     // make sure that king is not in check
     if (is_square_attacked(pos, (pos->side == Color::WHITE) ? get_lsb_index(pos->bitboards[BK]) : get_lsb_index(pos->bitboards[WK]), pos->side)) {
-      return 0;
+      return false;
     }
     else {
-      return 1;
+      return true;
     }
   }
   else {
@@ -335,7 +336,7 @@ int make_move(Position* pos, Move move, Move_Type move_flag) {
     }
     else
       // don't make move
-      return 0;
+      return false;
   }
 }
 

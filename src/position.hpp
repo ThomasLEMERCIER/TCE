@@ -32,8 +32,8 @@ public:
   bool is_repetition();
 };
 
-int is_square_attacked(Position* pos, Square square, Color side);
-int make_move(Position* pos, Move move, Move_Type move_flag);
+bool is_square_attacked(Position* pos, Square square, Color side);
+bool make_move(Position* pos, Move move, Move_Type move_flag);
 void make_null_move(Position* pos);
 U64 generate_hash_key(Position* pos);
 void init_random_keys();

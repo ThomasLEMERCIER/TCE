@@ -180,7 +180,7 @@ int negamax(Position* pos, int alpha, int beta, int depth, int null_pruning, Thr
   td.pv_length[pos->ply] = pos->ply;
 
   // check if king is in check
-  int in_check = is_square_attacked(pos, (pos->side == WHITE) ? get_lsb_index(pos->bitboards[WK]) :
+  bool in_check = is_square_attacked(pos, (pos->side == WHITE) ? get_lsb_index(pos->bitboards[WK]) :
                                                                 get_lsb_index(pos->bitboards[BK]),
                                                                 ~pos->side);
 

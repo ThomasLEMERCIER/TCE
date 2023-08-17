@@ -19,7 +19,7 @@ class TranspositionTable {
 public:
   TTEntry table[hash_size];
 
-  int probe(Position* pos, TTEntry& tte);
+  bool probe(Position* pos, TTEntry& tte);
   void write_entry(Position* pos, int flag, int score, int depth, Move move);
   void clear();
 };

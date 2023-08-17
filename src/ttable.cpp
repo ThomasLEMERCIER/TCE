@@ -8,12 +8,16 @@ void TranspositionTable::clear() {
   memset(this, 0, sizeof(TranspositionTable));
 }
 
-int TranspositionTable::probe(Position* pos, TTEntry& tte) {
+bool TranspositionTable::probe(Position* pos, TTEntry& tte) {
+  // return true if the position is found in the table
+
+  // retrieve the entry from the table and set it to tte
   tte = table[pos->hash_key % hash_size];
 
+  // check if the hash key matches
   if (tte.key == pos->hash_key)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 void TranspositionTable::write_entry(Position* pos, int flag, int score, int depth, Move move) {
