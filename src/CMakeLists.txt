@@ -1,0 +1,5 @@
+file(GLOB SOURCES *.cpp)
+file(GLOB HEADERS *.hpp)
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
