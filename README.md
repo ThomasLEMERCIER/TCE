@@ -57,7 +57,6 @@ Features that are planned for the future, but not yet implemented:
 #### Search
 
 - Aspiration windows
-- Late move reductions
 - Futility pruning
 - Razoring
 - Singular extensions
