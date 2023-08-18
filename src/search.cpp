@@ -264,15 +264,10 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
 
         alpha = score;
 
-        // write PV move
+        // update principal variation table
         td.pv_table[pos->ply][pos->ply] = current_move;
-              
-        // loop over the next ply
         for (int next_ply = pos->ply + 1; next_ply < td.pv_length[pos->ply + 1]; next_ply++)
-          // copy move from deeper ply into a current ply's line
           td.pv_table[pos->ply][next_ply] = td.pv_table[pos->ply + 1][next_ply];
-        
-        // adjust PV length
         td.pv_length[pos->ply] = td.pv_length[pos->ply + 1];
 
         // fail-hard beta cutoff
