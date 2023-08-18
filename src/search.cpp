@@ -15,7 +15,7 @@ std::thread search_thread;
 ThreadData search_td;
 std::atomic<bool> search_stopped;
 
-inline bool lmr_condition(Move move, int moves_searched, int in_check, int depth) {
+inline bool lmr_condition(Move move, int moves_searched, bool in_check, int depth) {
   return  (moves_searched >= full_depth_moves) &&
           (depth >= lmr_reduction) &&
           (in_check == 0) && 
