@@ -62,6 +62,7 @@ Features that are planned for the future, but not yet implemented:
 - Singular extensions
 - Static exchange evaluation
 - Mate distance pruning
+- Multi-threading
 
 #### Transposition table
 
