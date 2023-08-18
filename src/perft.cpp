@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-void perft_driver(Position* pos, int depth, long& nodes) {
+void perft_driver(Position* pos, int depth, NodeCounter& nodes) {
   // recursion escape condition
   if (depth == 0) {
     nodes++;
@@ -31,7 +31,7 @@ void perft_test(Position* pos, int depth) {
   std::cout << "\n\n Performance test\n\n";
 
   TimePoint start = get_time_ms();
-  long nodes = 0;
+  NodeCounter nodes = 0;
 
   MoveList move_list[1];
   generate_moves(pos, move_list);
@@ -42,11 +42,11 @@ void perft_test(Position* pos, int depth) {
     if (!make_move(&next_pos, move_list->moves[count].move, ALL_MOVES))
       continue;
 
-    long cummulative_nodes = nodes;
+    NodeCounter cummulative_nodes = nodes;
 
     perft_driver(&next_pos, depth - 1, nodes);
 
-    long old_nodes = nodes - cummulative_nodes;
+    NodeCounter old_nodes = nodes - cummulative_nodes;
     std::cout << "    move: " << square_to_coordinates[get_move_source(move_list->moves[count].move)]
       << square_to_coordinates[get_move_target(move_list->moves[count].move)]
       << ((get_move_promoted(move_list->moves[count].move)) ? ascii_pieces[get_move_promoted(move_list->moves[count].move)] : ' ')
