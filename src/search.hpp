@@ -32,6 +32,7 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
 
 void search_position(ThreadData& td);
 
+// search hyperparameters
 constexpr int full_depth_moves = 4;
 constexpr int lmr_reduction = 3;
 constexpr int null_move_reduction = 3;

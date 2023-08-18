@@ -15,14 +15,6 @@ std::thread search_thread;
 ThreadData search_td;
 std::atomic<bool> search_stopped;
 
-inline bool lmr_condition(Move move, int moves_searched, bool in_check, int depth) {
-  return  (moves_searched >= full_depth_moves) &&
-          (depth >= lmr_reduction) &&
-          (in_check == 0) && 
-          (get_move_capture_f(move) == 0) &&
-          (get_move_promoted(move) == 0);
-}
-
 inline void check_time(const SearchLimits& limits) {
   if (search_stopped) return;
   if (!limits.use_time_management()) return;
@@ -218,6 +210,8 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
   int moves_searched = 0;
   Move current_move;
 
+  bool lmr = !in_check && depth > lmr_reduction;
+
   while ((current_move = orderer.next_move()) != UNDEFINED_MOVE) {
     Position next_pos = Position(pos);
 
@@ -231,28 +225,23 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
     legal_moves++;
 
     // full depth search
-    if (moves_searched == 0)
-      // do normal alpha beta search
-      score = -negamax(&next_pos, -beta, -alpha, depth - 1, true, td);
+    if (moves_searched == 0) score = -negamax(&next_pos, -beta, -alpha, depth - 1, true, td); // full depth search
     // late move reduction (LMR)
-    else
-    {
+    else {
       // condition to consider LMR
-      if(lmr_condition(current_move, moves_searched, in_check, depth)) {
+      if(lmr && (moves_searched >= full_depth_moves) && (get_move_capture_f(current_move) == 0) && (get_move_promoted(current_move) == 0)) {
         // search current move with reduced depth:
         score = -negamax(&next_pos, -alpha - 1, -alpha, depth - lmr_reduction, true, td);
       }
-      else {
-        score = alpha + 1;
-      }
-      
-      // PVS
+      else score = alpha + 1; // fail-soft to trigger PVS
+
+      // Principal Variation Search (PVS)
       if(score > alpha)
       {
         score = -negamax(&next_pos, -alpha - 1, -alpha, depth-1, true, td);
-    
-        if((score > alpha) && (score < beta))
-          score = -negamax(&next_pos, -beta, -alpha, depth-1, true, td);
+  
+      if((score > alpha) && (score < beta))
+        score = -negamax(&next_pos, -beta, -alpha, depth-1, true, td);
       }
     }
 

@@ -31,9 +31,9 @@ Square get_move_source(Move move);
 Square get_move_target(Move move);
 Piece get_move_piece(Move move);
 Piece get_move_promoted(Move move);
-int get_move_capture_f(Move move);
-int get_move_double_f(Move move);
-int get_move_enpassant_f(Move move);
-int get_move_castling_f(Move move);
+bool get_move_capture_f(Move move);
+bool get_move_double_f(Move move);
+bool get_move_enpassant_f(Move move);
+bool get_move_castling_f(Move move);
 
 void print_move(Move move);

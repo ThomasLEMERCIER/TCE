@@ -10,10 +10,10 @@ Square get_move_source(Move move)   { return Square(move & 0x3f); }
 Square get_move_target(Move move)   { return Square((move & 0xfc0) >> 6); }
 Piece get_move_piece(Move move)     { return Piece((move & 0xf000) >> 12); }
 Piece get_move_promoted(Move move)  { return Piece((move & 0xf0000) >> 16); }
-int get_move_capture_f(Move move)   { return (move & 0x100000); }
-int get_move_double_f(Move move)    { return (move & 0x200000); }
-int get_move_enpassant_f(Move move) { return (move & 0x400000); }
-int get_move_castling_f(Move move)  { return (move& 0x800000); }
+bool get_move_capture_f(Move move)   { return (move & 0x100000); }
+bool get_move_double_f(Move move)    { return (move & 0x200000); }
+bool get_move_enpassant_f(Move move) { return (move & 0x400000); }
+bool get_move_castling_f(Move move)  { return (move& 0x800000); }
 
 void print_move(Move move) {
   if (move == UNDEFINED_MOVE)
