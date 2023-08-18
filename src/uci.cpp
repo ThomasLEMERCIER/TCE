@@ -68,7 +68,7 @@ void parse_position(Position& pos, std::istringstream& ss, bool& position_set) {
   if (token == "moves") {
     Move move;
     while (ss >> token && (move = parse_move(&pos, token)) != UNDEFINED_MOVE) {
-      make_move(&pos, move, ALL_MOVES);
+      make_move(&pos, move, Move_Type::ALL_MOVES);
     }
   }
   position_set = true;

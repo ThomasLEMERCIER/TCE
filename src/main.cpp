@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
     pos->set(start_position);
     print_board(pos);
 
-    print_bitboard(pos->bitboards[WP]);
-    print_bitboard(pos->bitboards[BP]);
+    print_bitboard(pos->bitboards[Piece::WP]);
+    print_bitboard(pos->bitboards[Piece::BP]);
     perft_test(pos, 6);
 
     pos->set(tricky_position);

@@ -154,25 +154,25 @@ bool is_square_attacked(Position* pos, Square square, Color side) {
   // using symmetry of attack pattern
 
   // white pawn attack
-  if ((side == Color::WHITE) && (pawn_attacks[Color::BLACK][square] & pos->bitboards[WP])) return true;
+  if ((side == Color::WHITE) && (pawn_attacks[Color::BLACK][square] & pos->bitboards[Piece::WP])) return true;
 
   // black pawn attack
-  if ((side == Color::BLACK) && (pawn_attacks[Color::WHITE][square] & pos->bitboards[BP])) return true;
+  if ((side == Color::BLACK) && (pawn_attacks[Color::WHITE][square] & pos->bitboards[Piece::BP])) return true;
 
   // knight attack
-  if (knight_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[WN] :pos-> bitboards[BN])) return true;
+  if (knight_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[Piece::WN] :pos-> bitboards[Piece::BN])) return true;
 
   // bishop attack
-  if (get_bishop_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WB] : pos->bitboards[BB])) return true;
+  if (get_bishop_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[Piece::WB] : pos->bitboards[Piece::BB])) return true;
 
   // bishop attack
-  if (get_rook_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WR] : pos->bitboards[BR])) return true;
+  if (get_rook_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[Piece::WR] : pos->bitboards[Piece::BR])) return true;
 
   // queen attack
-  if (get_queen_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[WQ] : pos->bitboards[BQ])) return true;
+  if (get_queen_attacks(square, pos->occupancies[Color::BOTH]) & ((side == Color::WHITE) ? pos->bitboards[Piece::WQ] : pos->bitboards[Piece::BQ])) return true;
 
   // king attack
-  if (king_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[WK] : pos->bitboards[BK])) return true;
+  if (king_attacks[square] & ((side == Color::WHITE) ? pos->bitboards[Piece::WK] : pos->bitboards[Piece::BK])) return true;
 
   return false;
 }
@@ -227,16 +227,16 @@ bool make_move(Position* pos, Move move, Move_Type move_flag) {
     // handle en passant
     if (enpassant_f) {
       if (pos->side == Color::WHITE) {
-        pop_bit(pos->bitboards[BP], shift<DOWN>(target_square));
-        pos->hash_key ^= piece_keys[BP][shift<DOWN>(target_square)];
-        pop_bit(pos->occupancies[Color::BLACK], shift<DOWN>(target_square));
-        pop_bit(pos->occupancies[Color::BOTH], shift<DOWN>(target_square));
+        pop_bit(pos->bitboards[Piece::BP], shift<Direction::DOWN>(target_square));
+        pos->hash_key ^= piece_keys[Piece::BP][shift<Direction::DOWN>(target_square)];
+        pop_bit(pos->occupancies[Color::BLACK], shift<Direction::DOWN>(target_square));
+        pop_bit(pos->occupancies[Color::BOTH], shift<Direction::DOWN>(target_square));
       }
       else {
-        pop_bit(pos->bitboards[WP], shift<UP>(target_square));
-        pos->hash_key ^= piece_keys[WP][shift<UP>(target_square)];
-        pop_bit(pos->occupancies[Color::WHITE], shift<UP>(target_square));
-        pop_bit(pos->occupancies[Color::BOTH], shift<UP>(target_square));
+        pop_bit(pos->bitboards[Piece::WP], shift<Direction::UP>(target_square));
+        pos->hash_key ^= piece_keys[Piece::WP][shift<Direction::UP>(target_square)];
+        pop_bit(pos->occupancies[Color::WHITE], shift<Direction::UP>(target_square));
+        pop_bit(pos->occupancies[Color::BOTH], shift<Direction::UP>(target_square));
       }
     }
 
@@ -249,10 +249,10 @@ bool make_move(Position* pos, Move move, Move_Type move_flag) {
     // handle double pawn move
     if (double_f) {
       if (pos->side == Color::WHITE) {
-        pos->enpassant = shift<DOWN>(target_square);
+        pos->enpassant = shift<Direction::DOWN>(target_square);
       }
       else {
-        pos->enpassant = shift<UP>(target_square);
+        pos->enpassant = shift<Direction::UP>(target_square);
       }
       pos->hash_key ^= enpassant_keys[pos->enpassant];
     }
@@ -322,7 +322,7 @@ bool make_move(Position* pos, Move move, Move_Type move_flag) {
     pos->repetition_table[pos->repetition_index] = pos->hash_key;
 
     // make sure that king is not in check
-    if (is_square_attacked(pos, (pos->side == Color::WHITE) ? get_lsb_index(pos->bitboards[BK]) : get_lsb_index(pos->bitboards[WK]), pos->side)) {
+    if (is_square_attacked(pos, (pos->side == Color::WHITE) ? get_lsb_index(pos->bitboards[Piece::BK]) : get_lsb_index(pos->bitboards[Piece::WK]), pos->side)) {
       return false;
     }
     else {
@@ -355,8 +355,8 @@ void make_null_move(Position* pos) {
 }
 
 void print_board(Position* pos) {
-  for (Rank rank = Rank::RANK_8; rank <= RANK_1; ++rank) {
-    for (File file = File::FILE_A; file <= FILE_H; ++file) {
+  for (Rank rank = Rank::RANK_8; rank <= Rank::RANK_1; ++rank) {
+    for (File file = File::FILE_A; file <= File::FILE_H; ++file) {
       Square square = get_square(rank, file);
 
       if (!file) {

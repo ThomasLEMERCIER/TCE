@@ -7,41 +7,41 @@ Bitboard white_passed_masks[SQUARE_NB];
 Bitboard black_passed_masks[SQUARE_NB];
 
 void init_evaluation_masks() {
-  for (Rank rank = Rank::RANK_8; rank <= RANK_1; ++rank) {
-    for (File file = File::FILE_A; file <= FILE_H; ++file) {
+  for (Rank rank = Rank::RANK_8; rank <= Rank::RANK_1; ++rank) {
+    for (File file = File::FILE_A; file <= File::FILE_H; ++file) {
       Square square = get_square(rank, file);
 
-      if (file > FILE_A)
-        isolated_masks[square] |= get_file_bb(shift<LEFT>(file));
-      if (file < FILE_H)
-        isolated_masks[square] |= get_file_bb(shift<RIGHT>(file));
+      if (file > File::FILE_A)
+        isolated_masks[square] |= get_file_bb(shift<Direction::LEFT>(file));
+      if (file < File::FILE_H)
+        isolated_masks[square] |= get_file_bb(shift<Direction::RIGHT>(file));
     }
   }
     
-  for (Rank rank = Rank::RANK_8; rank <= RANK_1; ++rank) {
-    for (File file = File::FILE_A; file <= FILE_H; ++file) {
+  for (Rank rank = Rank::RANK_8; rank <= Rank::RANK_1; ++rank) {
+    for (File file = File::FILE_A; file <= File::FILE_H; ++file) {
       Square square = get_square(rank, file);
 
-      if (file > FILE_A)
-        white_passed_masks[square] |= get_file_bb(shift<LEFT>(file));
+      if (file > File::FILE_A)
+        white_passed_masks[square] |= get_file_bb(shift<Direction::LEFT>(file));
       white_passed_masks[square] |= get_file_bb(file);
-      if (file < FILE_H)
-        white_passed_masks[square] |= get_file_bb(shift<RIGHT>(file));
+      if (file < File::FILE_H)
+        white_passed_masks[square] |= get_file_bb(shift<Direction::RIGHT>(file));
 
       for (Rank r = Rank::RANK_1; r >= rank; --r) 
         white_passed_masks[square] &= ~get_rank_bb(r);
     }
   }
     
-  for (Rank rank = Rank::RANK_8; rank <= RANK_1; ++rank) {
-    for (File file = File::FILE_A; file <= FILE_H; ++file) {
+  for (Rank rank = Rank::RANK_8; rank <= Rank::RANK_1; ++rank) {
+    for (File file = File::FILE_A; file <= File::FILE_H; ++file) {
       Square square = get_square(rank, file);
 
-      if (file > FILE_A)
-        black_passed_masks[square] |= get_file_bb(shift<LEFT>(file));
+      if (file > File::FILE_A)
+        black_passed_masks[square] |= get_file_bb(shift<Direction::LEFT>(file));
       black_passed_masks[square] |= get_file_bb(file);
-      if (file < FILE_H)
-        black_passed_masks[square] |= get_file_bb(shift<RIGHT>(file));
+      if (file < File::FILE_H)
+        black_passed_masks[square] |= get_file_bb(shift<Direction::RIGHT>(file));
 
       for (Rank r = Rank::RANK_8; r <= rank; ++r) 
         black_passed_masks[square] &= ~get_rank_bb(r);
@@ -176,5 +176,5 @@ Score evaluate(Position* pos) {
     }
   }
   // return final evaluation based on side
-  return (pos->side == WHITE) ? score : -score;
+  return (pos->side == Color::WHITE) ? score : -score;
 }

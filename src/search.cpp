@@ -105,7 +105,7 @@ int quiescence(Position* pos, Score alpha, Score beta, ThreadData& td) {
     Position next_pos = Position(pos);
 
     // check if move is legal
-    if (!make_move(&next_pos, current_move, ONLY_CAPTURES))  {
+    if (!make_move(&next_pos, current_move, Move_Type::ONLY_CAPTURES))  {
       continue;
     }
 
@@ -172,8 +172,8 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
   td.pv_length[pos->ply] = pos->ply;
 
   // check if king is in check
-  bool in_check = is_square_attacked(pos, (pos->side == WHITE) ? get_lsb_index(pos->bitboards[WK]) :
-                                                                get_lsb_index(pos->bitboards[BK]),
+  bool in_check = is_square_attacked(pos, (pos->side == Color::WHITE) ? get_lsb_index(pos->bitboards[Piece::WK]) :
+                                                                get_lsb_index(pos->bitboards[Piece::BK]),
                                                                 ~pos->side);
 
   // increase search depth if king has been exposed to check
@@ -216,7 +216,7 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
     Position next_pos = Position(pos);
 
     // check if move is legal
-    if (!make_move(&next_pos, current_move, ALL_MOVES)) {
+    if (!make_move(&next_pos, current_move, Move_Type::ALL_MOVES)) {
       continue;
     }
 

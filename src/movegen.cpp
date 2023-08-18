@@ -88,13 +88,13 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
 
   // Promotions and underpromotions
   if (pawnsOn7) {
-    b1 = shift<RIGHT>(shift<forward>(pawnsOn7)) & enemies; // capture promotion
-    b2 = shift<LEFT>(shift<forward>(pawnsOn7)) & enemies; // capture promotion
+    b1 = shift<Direction::RIGHT>(shift<forward>(pawnsOn7)) & enemies; // capture promotion
+    b2 = shift<Direction::LEFT>(shift<forward>(pawnsOn7)) & enemies; // capture promotion
     b3 = shift<forward>(pawnsOn7) & emptySquares; // forward promotion
 
     while (b1) {
       target_square = get_lsb_index(b1);
-      source_square = shift<LEFT>(shift<backward>(target_square));
+      source_square = shift<Direction::LEFT>(shift<backward>(target_square));
       for (auto piece_prom : (pos->side == Color::WHITE) ? WhitePromPiece : BlackPromPiece)
         move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 1, 0, 0, 0));            
       pop_bit(b1, target_square);
@@ -102,7 +102,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
 
     while (b2) {
       target_square = get_lsb_index(b2);
-      source_square = shift<RIGHT>(shift<backward>(target_square));
+      source_square = shift<Direction::RIGHT>(shift<backward>(target_square));
       for (auto piece_prom : (pos->side == Color::WHITE) ? WhitePromPiece : BlackPromPiece)
         move_push(move_list, encode_move(source_square, target_square, piece, piece_prom, 1, 0, 0, 0));            
       pop_bit(b2, target_square);
@@ -118,13 +118,13 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
   }
 
   // Standard and en passant captures
-  b1 = shift<RIGHT>(shift<forward>(pawnsNotOn7)) & enemies;
-  b2 = shift<LEFT>(shift<forward>(pawnsNotOn7)) & enemies;
+  b1 = shift<Direction::RIGHT>(shift<forward>(pawnsNotOn7)) & enemies;
+  b2 = shift<Direction::LEFT>(shift<forward>(pawnsNotOn7)) & enemies;
 
   while (b1)
   {
     target_square = get_lsb_index(b1);
-    source_square = shift<LEFT>(shift<backward>(target_square));
+    source_square = shift<Direction::LEFT>(shift<backward>(target_square));
     move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));            
     pop_bit(b1, target_square);
   }
@@ -132,7 +132,7 @@ void generate_pawn_moves(Position* pos, MoveList* move_list) {
   while (b2)
   {
     target_square = get_lsb_index(b2);
-    source_square = shift<RIGHT>(shift<backward>(target_square));
+    source_square = shift<Direction::RIGHT>(shift<backward>(target_square));
     move_push(move_list, encode_move(source_square, target_square, piece, (Piece)0, 1, 0, 0, 0));            
     pop_bit(b2, target_square);
   }

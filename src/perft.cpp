@@ -19,7 +19,7 @@ void perft_driver(Position* pos, int depth, NodeCounter& nodes) {
     for (int count = 0; count < move_list->move_count; count++) {
       Position next_pos = Position(pos);
 
-      if (!make_move(&next_pos, move_list->moves[count].move, ALL_MOVES))
+      if (!make_move(&next_pos, move_list->moves[count].move, Move_Type::ALL_MOVES))
         continue;
 
        perft_driver(&next_pos, depth - 1, nodes);
@@ -39,7 +39,7 @@ void perft_test(Position* pos, int depth) {
   for (int count = 0; count < move_list->move_count; count++) {
     Position next_pos = Position(pos);
 
-    if (!make_move(&next_pos, move_list->moves[count].move, ALL_MOVES))
+    if (!make_move(&next_pos, move_list->moves[count].move, Move_Type::ALL_MOVES))
       continue;
 
     NodeCounter cummulative_nodes = nodes;

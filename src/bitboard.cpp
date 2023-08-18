@@ -3,7 +3,6 @@
 #include "rng.hpp"
 
 #include <cstring>    // memset
-#include <cassert>    // assert
 #include <iostream>
 
 Bitboard pawn_attacks[COLOR_NB][SQUARE_NB];
@@ -69,8 +68,8 @@ Bitboard mask_king_attacks(Square square) {
 
 void init_leapers_attacks() {
   for (Square square = Square::FIRST_SQUARE; square <= Square::LAST_SQUARE; ++square) {
-    pawn_attacks[Color::WHITE][square] = mask_pawn_attacks(WHITE, square);
-    pawn_attacks[Color::BLACK][square] = mask_pawn_attacks(BLACK, square);
+    pawn_attacks[Color::WHITE][square] = mask_pawn_attacks(Color::WHITE, square);
+    pawn_attacks[Color::BLACK][square] = mask_pawn_attacks(Color::BLACK, square);
 
     knight_attacks[square] = mask_knight_attacks(square);
 
@@ -359,7 +358,6 @@ void pop_bit(Bitboard& bitboard, Square square) {
 }
 
 Square get_lsb_index(Bitboard bitboard) {
-  assert(BB);
   return Square(__builtin_ctzll(bitboard));
 }
 
@@ -375,8 +373,8 @@ Rank get_rank(Square square) { return Rank((int)square >> 3); }
 File get_file(Square square) { return File((int)square & 7); }
 
 void print_bitboard(Bitboard bitboard) { 
- for (Rank rank = Rank::RANK_8; rank <= RANK_1; ++rank) {
-    for (File file = File::FILE_A; file <= FILE_H; ++file) {
+ for (Rank rank = Rank::RANK_8; rank <= Rank::RANK_1; ++rank) {
+    for (File file = File::FILE_A; file <= File::FILE_H; ++file) {
       Square square = get_square(rank, file);
 
       if (!file) {
