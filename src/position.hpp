@@ -27,6 +27,7 @@ public:
   int repetition_index;
 
   int ply;
+  int piece_count[PIECE_NB];
 
   void set(const std::string& fenStr);
   bool is_repetition();
