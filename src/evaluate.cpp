@@ -5,6 +5,7 @@
 #include <algorithm> // std::clamp
 #ifdef TRACE_EVAL
 #include <iostream>
+#define PRINT_SCORE(score) std::cout << "MG score: " << score.mg << " EG score: " << score.eg;
 #endif
 
 Bitboard isolated_masks[SQUARE_NB];

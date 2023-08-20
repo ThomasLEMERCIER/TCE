@@ -7,67 +7,10 @@
 /*
 TODO:
 
-// ========= final evaluation =========
-eval = ((opening * (256 - phase)) + (endgame * phase)) / 256
-// ====================================
-
-// ========= determine phase =========
-PawnPhase = 0
-KnightPhase = 1
-BishopPhase = 1
-RookPhase = 2
-QueenPhase = 4
-TotalPhase = PawnPhase*16 + KnightPhase*4 + BishopPhase*4 + RookPhase*4 + QueenPhase*2
-
-phase = TotalPhase
-
-phase -= wp * PawnPhase // Where wp is the number of white pawns currently on the board
-phase -= wn * Knight    // White knights
-...
-phase -= br * RookPhase
-phase -= bq * QueenPhase
-
-phase = (phase * 256 + (TotalPhase / 2)) / TotalPhase
-
-
-
-// Stockfish
-
-npm in [ENDGAME_THRESHOLD, MIDGAME_THRESHOLD]
-
-phase = (npm - ENDGAME_THRESHOLD) * PHASE_MIDGAME / (MIDGAME_THRESHOLD - ENDGAME_THRESHOLD); in [0, 128] (0 = endgame, 128 = midgame)
-
-ENDGAME_THRESHOLD = 3915
-MIDGAME_THRESHOLD = 15258
-PHASE_MIDGAME = 128
-
-npm = sum(nb_piece * piece_value) midgame value
-
-
-endvalue = (mg_value * phase + eg_value * (128 - phase)) / 128
-
-
-// ====================================
-
-// evaluate material + compute phase
-
-Bonus for the bishop pair (bishops complement each other, controlling squares of different color)
-Penalty for the rook pair (Larry Kaufman called it "principle of redundancy")
-Penalty for the knight pair (as two knights are less successful against the rook than any other pair of minor pieces)
-decreasing the value of the rook pawns and increasing the value of the central pawns (though this can be done in the piece-square tables as well)
-Trade down bonus that encourages the winning side to trade pieces but no pawns [3]
-Penalty for having no pawns, as it makes it more difficult to win the endgame
 Bad trade penalty as proposed by Robert Hyatt, that is penalizing the material imbalances that are disadvantageous like having three pawns for a piece or a rook for two minors.
-Elephantiasis effect as suggested by Harm Geert Muller (meaning that stronger pieces lose part of their value in presence of weaker pieces)
 
-// evaluate piece-square tables
-// evaluate pawn structure
+Add draw knowledge from insufficient material (e.g. KK, KBK, KNK)
 
-// evaluate piece (mobility, king safety, etc.)
-
-// compute phase
-
-// compute final evaluation
 */
 
 struct ScoreExt
@@ -75,11 +18,6 @@ struct ScoreExt
   Score mg;
   Score eg;
 };
-
-#ifdef TRACE_EVAL
-  #define PRINT_SCORE(score) std::cout << "MG score: " << score.mg << " EG score: " << score.eg;
-#endif
-
 
 using Phase = int;
 
@@ -109,9 +47,6 @@ constexpr ScoreExt BishopPairBonus = { 50, 50 };
 constexpr ScoreExt RookPairPenalty = { -50, -50 };
 constexpr ScoreExt KnightPairPenalty = { -50, -50 };
 constexpr ScoreExt NoPawnPenalty = { -50, -50 };
-
-// =============================================
-
 
 // ============== Piece-square tables ============== // from PeSTO's Evaluation Function
 
@@ -205,8 +140,6 @@ constexpr ScoreExt king_shield_bonus =        { 5,  5 };
 constexpr ScoreExt mobility_score[6] = { S(0, 0), S(0, 0), S(5, 5), S(5, 5), S(5, 5), S(0, 0) };
 
 void init_evaluation_masks();
-
-
 
 Score evaluate(Position* pos);
 ScoreExt evaluate_material(Position* pos, Phase& phase);
