@@ -121,7 +121,7 @@ void uci_loop(int argc, char* argv[]) {
   std::string cmd;
 
   // main loop
-  while (1) {
+  for(;;) {
 
     if (!std::getline(std::cin, cmd)) continue;
 

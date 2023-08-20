@@ -25,6 +25,7 @@ TCE is an ongoing work in progress, with current features including:
 #### Search
 - Iterative deepening
 - NegaMax with alpha-beta pruning
+- Aspiration windows
 - Quiescence search
 - Principal variation search
 - Null move pruning
@@ -53,11 +54,9 @@ Features that are planned for the future, but not yet implemented:
 #### General
 
 - UCI options
-- Opening book
 
 #### Search
 
-- Aspiration windows
 - Futility pruning
 - Razoring
 - Singular extensions

@@ -10,6 +10,7 @@
 #include <thread>
 #include <cstring>    // memset
 #include <iostream>
+#include <algorithm>  // std::min
 
 std::thread search_thread;
 ThreadData search_td;
@@ -53,7 +54,7 @@ void stop_search() {
   if (search_thread.joinable()) search_thread.join();
 }
 
-int quiescence(Position* pos, Score alpha, Score beta, ThreadData& td) {
+Score quiescence(Position* pos, Score alpha, Score beta, ThreadData& td) {
   // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
@@ -131,7 +132,7 @@ int quiescence(Position* pos, Score alpha, Score beta, ThreadData& td) {
   return alpha;
 }
 
-int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning, ThreadData& td) {
+Score negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning, ThreadData& td) {
   // check if time is up
   if((td.thread_id == 0) && ((td.nodes & check_every_nodes ) == 0))
     check_time(td.limits);
@@ -304,6 +305,52 @@ int negamax(Position* pos, Score alpha, Score beta, int depth, bool null_pruning
   return return_score;
 }
 
+Score aspiration_window(Position* pos, Score previous_score, int depth, ThreadData& td) {
+
+  Score alpha = -INF;
+  Score beta = INF;
+
+  Score window = aspiration_window_start - aspiration_window_decrement * (depth - aspiration_window_depth);
+  window = std::max(window, aspiration_window_end);
+
+  // apply aspiration window if previous score is not NO_VALUE and depth is enough
+  if (previous_score != NO_VALUE && depth > aspiration_window_depth) {
+    alpha = previous_score - window;
+    beta = previous_score + window;
+  }
+
+  Score score;
+
+  for (;;) {
+    score = negamax(pos, alpha, beta, depth, false, td);
+
+    // if the search was stopped, return NO_VALUE
+    if (search_stopped) return NO_VALUE;
+
+    // out of bounds
+    if (score <= alpha) {
+      beta = (alpha + beta + 1) / 2;
+      alpha = alpha - window;
+    }
+    else if (score >= beta) {
+      beta = beta + window;
+    }
+    // within bounds
+    else {
+      break;
+    }
+
+    // increase window if it is too small
+    window += window / 2;
+    if (window > aspiration_window_max) {
+      alpha = -INF;
+      beta = INF;
+    }    
+  }
+  
+  return score;
+}
+
 void search_position(ThreadData& td) {
   // start timer
   TimePoint top_time = get_time_ms();
@@ -312,13 +359,13 @@ void search_position(ThreadData& td) {
   Position* pos = &td.pos;
   pos->ply = 0;
 
-  // initialize alpha and beta
-  Score alpha = -INF, beta = INF;
   Move bestmove = UNDEFINED_MOVE;
+  Score score = NO_VALUE;
+
 
   // iterative deepening
   for (int current_depth = 1; current_depth <= td.depth; current_depth++) {
-    Score score = negamax(pos, alpha, beta, current_depth, false, td);
+    score = aspiration_window(pos, score, current_depth, td);
 
     // if the search was stopped, break
     if (search_stopped) break;
