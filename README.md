@@ -44,6 +44,7 @@ TCE is an ongoing work in progress, with current features including:
 - Piece mobility
 - King safety
 - Pawn structure (Doubled, isolated, passed)
+- Tapered evaluation
 
 ## TODO
 
@@ -70,7 +71,6 @@ Features that are planned for the future, but not yet implemented:
 
 #### Evaluation
 
-- Tapered evaluation
 - NNUE
 
 ## Build
