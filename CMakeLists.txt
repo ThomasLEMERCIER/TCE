@@ -13,6 +13,9 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 message("* Current build type: ${CMAKE_BUILD_TYPE}")
 
+# Add options
+option(TRACE_EVAL "Output evaluation trace" OFF)
+
 # Set compiler flags :
 # Set common flags
 add_compile_options(-Wall -Wcast-qual -fno-exceptions -pedantic -Wextra -Wshadow -Wmissing-declarations -Wunused)
@@ -22,6 +25,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-O0 -g -DDEBUG)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Profile")
     add_compile_options(-g -pg)
+    add_link_options(-pg)
 endif()
 
 # Set optimization flags
@@ -31,12 +35,26 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Profile")
         -march=native           # Optimize for the current architecture
         -flto                   # Enable Link-Time Optimization
         -funroll-loops          # Unroll loops for performance
-        -fomit-frame-pointer    # Omit frame pointers for faster function calls
         -ffast-math             # Allow more aggressive floating-point optimizations
         -finline-functions      # Inline small functions for speed
         -fno-rtti               # Disable C++ RTTI
     )
 endif()
 
+# Set release flags
+if (CMAKE_BUILD_TYPE STREQUAL "Release")       
+    add_compile_options(
+        -fomit-frame-pointer    # Omit frame pointers for faster function calls
+    )
+endif()
+
+# Set user-defined flags
+if(TRACE_EVAL)
+    add_compile_options(-DTRACE_EVAL)
+endif()
+
 # add subdirectories
 add_subdirectory(src)
+
+# reset all options to default
+unset(TRACE_EVAL CACHE)

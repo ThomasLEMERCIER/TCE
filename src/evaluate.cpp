@@ -2,6 +2,12 @@
 
 #include "bitboard.hpp"
 
+#include <algorithm> // std::clamp
+#ifdef TRACE_EVAL
+#include <iostream>
+#define PRINT_SCORE(score) std::cout << "MG score: " << score.mg << " EG score: " << score.eg;
+#endif
+
 Bitboard isolated_masks[SQUARE_NB];
 Bitboard white_passed_masks[SQUARE_NB];
 Bitboard black_passed_masks[SQUARE_NB];
@@ -50,131 +56,254 @@ void init_evaluation_masks() {
 }
 
 Score evaluate(Position* pos) {
-  Score score = 0;
+  Phase phase = 0;
+  ScoreExt score = { 0, 0 };
 
-  U64 bitboard;
-  Square square;
-  int double_pawns = 0;
+#ifdef TRACE_EVAL
+  std::cout << "=========EVALUATION=========" << std::endl;
+  print_board(pos);
+#endif
+
+  score += evaluate_material(pos, phase);
+  score += evaluate_pieces<Piece::WN>(pos);
+  score += evaluate_pieces<Piece::WB>(pos);
+  score += evaluate_pieces<Piece::WR>(pos);
+  score += evaluate_pieces<Piece::WQ>(pos);
+  score += evaluate_pawns(pos);
+  score += evaluate_kings(pos);
+
+  Score final_score = (score.mg * phase + score.eg * (PhaseMidGame - phase)) / PhaseMidGame;
+
+#ifdef TRACE_EVAL
+  std::cout << "Final score: "; PRINT_SCORE(score); std::cout << std::endl;
+  std::cout << "Final score (phase): " << final_score << std::endl;
+  std::cout << "=========END EVALUATION=========" << std::endl;
+#endif
+
+  return (pos->side == Color::WHITE) ? final_score : -final_score;
+}
+
+ScoreExt evaluate_material(Position* pos, Phase& phase) {
+  ScoreExt score = { 0, 0 };
+
+  // extract number of pieces for each side
+  int white_pawns = pos->piece_count[Piece::WP];
+  int white_knights = pos->piece_count[Piece::WN];
+  int white_bishops = pos->piece_count[Piece::WB];
+  int white_rooks = pos->piece_count[Piece::WR];
+  int white_queens = pos->piece_count[Piece::WQ];
+
+  int black_pawns = pos->piece_count[Piece::BP];
+  int black_knights = pos->piece_count[Piece::BN];
+  int black_bishops = pos->piece_count[Piece::BB];
+  int black_rooks = pos->piece_count[Piece::BR];
+  int black_queens = pos->piece_count[Piece::BQ];
   
-  for (Piece piece = Piece::WP; piece <= Piece::BK; ++piece) {
-    bitboard = pos->bitboards[piece];
+  // compute material score
+  score += (white_pawns - black_pawns) * PawnValue;
+  score += (white_knights - black_knights) * KnightValue;
+  score += (white_bishops - black_bishops) * BishopValue;
+  score += (white_rooks - black_rooks) * RookValue;
+  score += (white_queens - black_queens) * QueenValue;
 
-    while (bitboard)
-    {
-      
-      square = get_lsb_index(bitboard);
-      score += material_score[piece];
+  // compute bonuses and penalties
+  if (white_bishops > 1) score += BishopPairBonus;
+  if (black_bishops > 1) score -= BishopPairBonus;
+  
+  if (white_knights > 1) score += KnightPairPenalty;
+  if (black_knights > 1) score -= KnightPairPenalty;
 
-      switch (piece)
-      {
-        case Piece::WP:
-          score += pawn_score[square];
+  if (white_rooks > 1) score += RookPairPenalty;
+  if (black_rooks > 1) score -= RookPairPenalty;
 
-          double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));
-          
-          if (double_pawns > 1)
-            score += double_pawn_penalty;
+  if (white_pawns == 0) score += NoPawnPenalty;
+  if (black_pawns == 0) score -= NoPawnPenalty;
 
-          if ((pos->bitboards[Piece::WP] & isolated_masks[square]) == 0)
-            score += isolated_pawn_penalty;
+  // compute phase
+  phase += (white_knights + black_knights) * KnightValue.mg;
+  phase += (white_bishops + black_bishops) * BishopValue.mg;
+  phase += (white_rooks + black_rooks) * RookValue.mg;
+  phase += (white_queens + black_queens) * QueenValue.mg;
 
-          if ((white_passed_masks[square] & pos->bitboards[Piece::BP]) == 0)
-            score += passed_pawn_bonus[get_rank(square)];
-          
-          break;
+  phase = std::clamp(phase, EndGameThreshold, MidGameThreshold);
+  phase = (phase - EndGameThreshold) * PhaseMidGame / (MidGameThreshold - EndGameThreshold);
 
-        case Piece::WN: score += knight_score[square]; break;
+#ifdef TRACE_EVAL
+  std::cout << "Material score: "; PRINT_SCORE(score); std::cout << std::endl;
+  std::cout << "Phase: " << phase << std::endl;
+#endif
 
-        case Piece::WB:
-          score += bishop_score[square];
-          score += count_bits(get_bishop_attacks(square, pos->occupancies[Color::BOTH]));   
-          break;
+  return score;
+}
 
-       case Piece::WR:
-          score += rook_score[square];
+template <Piece piece>
+ScoreExt evaluate_pieces(Position* pos) {
+  constexpr Piece mirror_piece = ~piece;
 
-          if ((pos->bitboards[Piece::WP] & get_file_bb(get_file(square))) == 0)
-            score += semi_open_file_score;
+  ScoreExt score = { 0, 0 };
 
-          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
-            score += open_file_score;
-          break;
-        
-        case Piece::WQ:
-          score += count_bits(get_queen_attacks(square, pos->occupancies[Color::BOTH]));
-          break;
-        
-        case Piece::WK:
-          score += king_score[square];
+  Bitboard bitboard;
+  Square square;
+  int mobility;
 
-          if ((pos->bitboards[Piece::WP] & get_file_bb(get_file(square))) == 0)
-            score -= semi_open_file_score;
+  // evaluate white pieces
+  bitboard = pos->bitboards[piece];
+  while (bitboard) {
+    square = get_lsb_index(bitboard);
 
-          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
-            score -= open_file_score;
+    // compute mobility for bishop, rook and queen
+    if constexpr (piece == Piece::WB || piece == Piece::WR || piece == Piece::WQ)
+      mobility = count_bits(get_attacks_bb<piece>(square, pos->occupancies[Color::BOTH]));
+    else
+      mobility = 0;
 
-          score += count_bits(get_king_attacks(square) & pos->occupancies[Color::WHITE]) * king_shield_bonus;
-          break;
+    // compute rook on open file bonus
+    if constexpr (piece == Piece::WR) {    
+      if ((pos->bitboards[Piece::WP] & get_file_bb(get_file(square))) == 0)
+        score += semi_open_file_score;
 
-        case Piece::BP:
-          score -= pawn_score[mirror_score[square]];
-
-          double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));       
-
-          if (double_pawns > 1)
-            score -= double_pawn_penalty;
-
-          if ((pos->bitboards[Piece::BP] & isolated_masks[square]) == 0)
-            score -= isolated_pawn_penalty;
-
-          if ((black_passed_masks[square] & pos->bitboards[Piece::WP]) == 0)
-            score -= passed_pawn_bonus[get_rank(mirror_score[square])];
-
-          break;
-
-        case Piece::BN: score -= knight_score[mirror_score[square]]; break;
-        
-        case Piece::BB:
-          score -= bishop_score[mirror_score[square]];
-
-          score -= count_bits(get_bishop_attacks(square, pos->occupancies[Color::BOTH]));
-          break;
-
-        case Piece::BR:
-          score -= rook_score[mirror_score[square]];
-
-          if ((pos->bitboards[Piece::BP] & get_file_bb(get_file(square))) == 0)
-            score -= semi_open_file_score;
-
-          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
-            score -= open_file_score;
-          
-          break;
-        
-        case Piece::BQ:
-          score -= count_bits(get_queen_attacks(square, pos->occupancies[Color::BOTH]));
-          break;
-        
-        case Piece::BK:
-          score -= king_score[mirror_score[square]];
-
-          if ((pos->bitboards[Piece::BP] & get_file_bb(get_file(square))) == 0)
-              score += semi_open_file_score;
-
-          if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
-              score += open_file_score;
-
-          score -= count_bits(get_king_attacks(square) & pos->occupancies[Color::BLACK]) * king_shield_bonus;
-          break;
-
-        default:
-          break;
-      }
-
-      // pop ls1b
-      pop_bit(bitboard, square);
+      if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
+        score += open_file_score;
     }
+
+    score += piece_square_tables[piece][square];
+    score += mobility * mobility_score[piece];
+
+    pop_bit(bitboard, square);
   }
-  // return final evaluation based on side
-  return (pos->side == Color::WHITE) ? score : -score;
+
+  // evaluate black pieces
+  bitboard = pos->bitboards[mirror_piece];
+  while (bitboard) {
+    square = get_lsb_index(bitboard);
+
+    // compute mobility for bishop, rook and queen
+    if constexpr (piece == Piece::WB || piece == Piece::WR || piece == Piece::WQ)
+      mobility = count_bits(get_attacks_bb<mirror_piece>(square, pos->occupancies[Color::BOTH]));
+    else
+      mobility = 0;
+
+    // compute rook on open file bonus
+    if constexpr (piece == Piece::WR) {    
+      if ((pos->bitboards[Piece::BP] & get_file_bb(get_file(square))) == 0)
+        score -= semi_open_file_score;
+
+      if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
+        score -= open_file_score;
+    }
+
+    score -= piece_square_tables[piece][mirror_square[square]];
+    score -= mobility * mobility_score[piece];
+
+    pop_bit(bitboard, square);
+  }
+
+#ifdef TRACE_EVAL
+  std::cout << "Piece score " << "(" << ascii_pieces[piece] << "): "; PRINT_SCORE(score); std::cout << std::endl;
+#endif
+
+  return score;
+}
+
+ScoreExt evaluate_kings(Position* pos) {
+  ScoreExt score = { 0, 0 };
+
+  Bitboard bitboard;
+  Square square;
+
+  // evaluate white king
+  bitboard = pos->bitboards[Piece::WK];
+  square = get_lsb_index(bitboard);
+
+  score += king_table[square];
+
+  // open king file penalty
+  if ((pos->bitboards[Piece::WP] & get_file_bb(get_file(square))) == 0)
+    score -= semi_open_file_score;
+
+  if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
+    score -= open_file_score;
+
+
+  // king shield bonus
+  score += count_bits(get_king_attacks(square) & pos->occupancies[Color::WHITE]) * king_shield_bonus;
+
+
+  // evaluate black king
+  bitboard = pos->bitboards[Piece::BK];
+  square = get_lsb_index(bitboard);
+
+  score -= king_table[mirror_square[square]];
+
+  // open king file penalty
+  if ((pos->bitboards[Piece::BP] & get_file_bb(get_file(square))) == 0)
+    score += semi_open_file_score;
+
+  if (((pos->bitboards[Piece::WP] | pos->bitboards[Piece::BP]) & get_file_bb(get_file(square))) == 0)
+    score += open_file_score;
+
+  // king shield bonus
+  score -= count_bits(get_king_attacks(square) & pos->occupancies[Color::BLACK]) * king_shield_bonus;
+
+#ifdef TRACE_EVAL
+  std::cout << "King score: "; PRINT_SCORE(score); std::cout << std::endl;
+#endif
+
+  return score;
+}
+
+ScoreExt evaluate_pawns(Position* pos) {
+  ScoreExt score = { 0, 0 };
+
+  Bitboard bitboard;
+  Square square;
+  int double_pawns;
+
+
+  // evaluate white pawns
+  bitboard = pos->bitboards[Piece::WP];
+  while (bitboard) {
+    square = get_lsb_index(bitboard);
+
+    score += pawn_table[square];
+
+
+    double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));
+    if (double_pawns > 1)
+      score += double_pawn_penalty;
+
+    if ((pos->bitboards[Piece::WP] & isolated_masks[square]) == 0)
+      score += isolated_pawn_penalty;
+
+    if ((white_passed_masks[square] & pos->bitboards[Piece::BP]) == 0)
+      score += passed_pawn_bonus[get_rank(square)];
+
+    pop_bit(bitboard, square);
+  }
+
+  // evaluate black pawns
+  bitboard = pos->bitboards[Piece::BP];
+  while (bitboard) {
+    square = get_lsb_index(bitboard);
+
+    score -= pawn_table[mirror_square[square]];
+
+    double_pawns = count_bits(bitboard & get_file_bb(get_file(square)));
+    if (double_pawns > 1)
+      score -= double_pawn_penalty;
+
+    if ((pos->bitboards[Piece::BP] & isolated_masks[square]) == 0)
+      score -= isolated_pawn_penalty;
+
+    if ((black_passed_masks[square] & pos->bitboards[Piece::WP]) == 0)
+      score -= passed_pawn_bonus[get_rank(mirror_square[square])];
+
+    pop_bit(bitboard, square);
+  }
+
+#ifdef TRACE_EVAL
+  std::cout << "Pawn score: "; PRINT_SCORE(score); std::cout << std::endl;
+#endif
+
+  return score;
 }

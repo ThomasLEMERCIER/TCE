@@ -16,6 +16,7 @@ Position::Position(Position* pos) {
   memcpy(bitboards, pos->bitboards, sizeof(bitboards));
   memcpy(occupancies, pos->occupancies, sizeof(occupancies));
   memcpy(repetition_table, pos->repetition_table, sizeof(repetition_table));
+  memcpy(piece_count, pos->piece_count, sizeof(piece_count));
   
   side = pos->side;
   enpassant = pos->enpassant;
@@ -24,6 +25,7 @@ Position::Position(Position* pos) {
   hash_key = pos->hash_key;
   repetition_index = pos->repetition_index;
   ply = pos->ply;
+
 };
 
 void Position::set(const std::string& fenStr) {
@@ -73,15 +75,20 @@ void Position::set(const std::string& fenStr) {
     enpassant = get_square(Rank(rank), File(file));
   }
 
-  // loop over white pieces bitboards
+  // set occupancy bitboards ========================
   for (piece = Piece::WP; piece <= Piece::WK; ++piece)
     occupancies[Color::WHITE] |= bitboards[piece];
-  // loop over black pieces bitboards
   for (piece = Piece::BP; piece <= Piece::BK; ++piece)
     occupancies[Color::BLACK] |= bitboards[piece];
 
   occupancies[Color::BOTH] |= occupancies[Color::WHITE];
   occupancies[Color::BOTH] |= occupancies[Color::BLACK];
+  // ================================================
+
+  // set piece count ================================
+  for (piece = Piece::WP; piece <= Piece::BK; ++piece)
+    piece_count[piece] = count_bits(bitboards[piece]);
+  // ================================================
 
   hash_key = generate_hash_key(this);
 
@@ -210,6 +217,7 @@ bool make_move(Position* pos, Move move, Move_Type move_flag) {
         if (get_bit(pos->bitboards[bb_piece], target_square)) {
           pop_bit(pos->bitboards[bb_piece], target_square);
           pos->hash_key ^= piece_keys[bb_piece][target_square];
+          pos->piece_count[bb_piece]--;
           break;
         }
       }
@@ -222,6 +230,8 @@ bool make_move(Position* pos, Move move, Move_Type move_flag) {
       pop_bit(pos->bitboards[piece], target_square);
       pos->hash_key ^= piece_keys[promoted][target_square];
       pos->hash_key ^= piece_keys[piece][target_square];
+      pos->piece_count[piece]--;
+      pos->piece_count[promoted]++;
     }
 
     // handle en passant
@@ -231,12 +241,14 @@ bool make_move(Position* pos, Move move, Move_Type move_flag) {
         pos->hash_key ^= piece_keys[Piece::BP][shift<Direction::DOWN>(target_square)];
         pop_bit(pos->occupancies[Color::BLACK], shift<Direction::DOWN>(target_square));
         pop_bit(pos->occupancies[Color::BOTH], shift<Direction::DOWN>(target_square));
+        pos->piece_count[Piece::BP]--;
       }
       else {
         pop_bit(pos->bitboards[Piece::WP], shift<Direction::UP>(target_square));
         pos->hash_key ^= piece_keys[Piece::WP][shift<Direction::UP>(target_square)];
         pop_bit(pos->occupancies[Color::WHITE], shift<Direction::UP>(target_square));
         pop_bit(pos->occupancies[Color::BOTH], shift<Direction::UP>(target_square));
+        pos->piece_count[Piece::WP]--;
       }
     }
 
