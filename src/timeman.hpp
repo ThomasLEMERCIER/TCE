@@ -18,7 +18,7 @@ struct SearchLimits {
   bool infinite;
 
   bool use_time_management() const {
-    return (!infinite) && (remaining_times[Color::WHITE] || remaining_times[Color::BLACK] || incs[Color::WHITE] || incs[Color::BLACK]);
+    return (!infinite) && (remaining_times[Color::WHITE] || remaining_times[Color::BLACK] || incs[Color::WHITE] || incs[Color::BLACK] || movetime);
   }
 };
 
